@@ -53,7 +53,7 @@ class Sample:
     def argon38(self):
         return self.argon38
 
-    def sargon39(self):
+    def argon39(self):
         return self.argon39
 
     def argon40(self):
