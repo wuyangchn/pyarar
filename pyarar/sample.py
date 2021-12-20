@@ -5,56 +5,115 @@
 # @Date   : 2021/12/19
 # @Email  : wuy@cug.edu.cn
 
+"""
+Create a sample instance.
+"""
+
+from pyarar.constants import *
+from pyarar.calcFuncs import *
+
 class Sample:
-    def __init__(self,
-                 sample_name=None, experiment_name=None,
-                 argon36=None, argon37=None, argon38=None, argon39=None, argon40=None):
-        self.sample_name: str = sample_name
-        self.experiment_name: str = experiment_name
-        self.argon36: list = argon36
-        self.argon37: list = argon37
-        self.argon38: list = argon38
-        self.argon39: list = argon39
-        self.argon40: list = argon40
+    def __init__(self, **kwargs):
 
-    def setSampleName(self, name: str):
-        self.sample_name = name
+        self.SampleName: str = kwargs.pop("SampleName", None)
+        self.SampleOwner: str = kwargs.pop("SampleOwner", None)
+        self.SampleType: str = kwargs.pop("SampleType", None)
+        self.SampleMineral: str = kwargs.pop("SampleMineral", None)
+        self.SampleEstimatedAge: str = kwargs.pop("SampleEstimatedAge", None)
+        self.SampleDescription: str = kwargs.pop("SampleDescription", None)
+        self.SampleLocation: str = kwargs.pop("SampleLocation", None)
+        self.ExperimentName: str = kwargs.pop("ExperimentName", None)
+        self.ExperimentAnalyst: str = kwargs.pop("ExperimentAnalyst", None)
 
-    def setExperimentName(self, name: str):
-        self.experiment_name = name
+        self.Ar36MList: list = kwargs.pop("Ar36MList", None)
+        self.Ar37MList: list = kwargs.pop("Ar37MList", None)
+        self.Ar38MList: list = kwargs.pop("Ar38MList", None)
+        self.Ar39MList: list = kwargs.pop("Ar39MList", None)
+        self.Ar40MList: list = kwargs.pop("Ar40MList", None)
 
-    def setArgon36(self, data: list):
-        self.argon36 = data
+        self.Ar36BList: list = kwargs.pop("Ar36BList", None)
+        self.Ar37BList: list = kwargs.pop("Ar37BList", None)
+        self.Ar38BList: list = kwargs.pop("Ar38BList", None)
+        self.Ar39BList: list = kwargs.pop("Ar39BList", None)
+        self.Ar40BList: list = kwargs.pop("Ar40BList", None)
 
-    def setArgon37(self, data: list):
-        self.argon37 = data
+        self.K40vsKFractions: float = kwargs.pop("K40vsKFractions", K40vsKFractions)
+        self.K40vsKFractionsError: float = kwargs.pop("K40vsKFractionsError", K40vsKFractionsError)
+        self.Cl35vsClFractions: float = kwargs.pop("Cl35vsClFractions", Cl35vsClFractions)
+        self.Cl35vsClFractionsError: float = kwargs.pop("Cl35vsClFractionsError", Cl35vsClFractionsError)
+        self.HClvsClFractions: float = kwargs.pop("HClvsClFractions", HClvsClFractions)
+        self.HClvsClFractionsError: float = kwargs.pop("HClvsClFractionsError", HClvsClFractionsError)
+        self.K40Mass: float = kwargs.pop("K40Mass", K40Mass)
+        self.K40MassError: float = kwargs.pop("K40MassError", K40MassError)
+        self.Ar36Mass: float = kwargs.pop("Ar36Mass", Ar36Mass)
+        self.Ar36MassError: float = kwargs.pop("Ar36MassError", Ar36MassError)
+        self.Ar37Mass: float = kwargs.pop("Ar37Mass", Ar37Mass)
+        self.Ar37MassError: float = kwargs.pop("Ar37MassError", Ar37MassError)
+        self.Ar38Mass: float = kwargs.pop("Ar38Mass", Ar38Mass)
+        self.Ar38MassError: float = kwargs.pop("Ar38MassError", Ar38MassError)
+        self.Ar39Mass: float = kwargs.pop("Ar39Mass", Ar39Mass)
+        self.Ar39MassError: float = kwargs.pop("Ar39MassError", Ar39MassError)
+        self.Ar40Mass: float = kwargs.pop("Ar40Mass", Ar40Mass)
+        self.Ar40MassError: float = kwargs.pop("Ar40MassError", Ar40MassError)
 
-    def setArgon38(self, data: list):
-        self.argon38 = data
+        self.JValue: float = kwargs.pop("JValue", JValue)
+        self.JValueError: float = kwargs.pop("JValueError", JValueError)
+        self.MDF: float = kwargs.pop("MDF", MDF)
+        self.MDFError: float = kwargs.pop("MDFError", MDFError)
+        self.Ar40vsAr36Const: float = kwargs.pop("Ar40vsAr36Const", Ar40vsAr36Const)
+        self.Ar40vsAr36ConstError: float = kwargs.pop("Ar40vsAr36ConstError", Ar40vsAr36ConstError)
+        self.York2FitConvergence: float = kwargs.pop("York2FitConvergence", York2FitConvergence)
+        self.York2FitIteration: float = kwargs.pop("York2FitIteration", York2FitIteration)
+        self.Fitting: str = kwargs.pop("Fitting", Fitting)
+        self.LinMassDiscrLaw: bool = kwargs.pop("LinMassDiscrLaw", LinMassDiscrLaw)
+        self.ExpMassDiscrLaw: bool = kwargs.pop("ExpMassDiscrLaw", ExpMassDiscrLaw)
+        self.PowMassDiscrLaw: bool = kwargs.pop("PowMassDiscrLaw", PowMassDiscrLaw)
+        self.ForceNegative: bool = kwargs.pop("ForceNegative", ForceNegative)
+        self.CorrBlank: bool = kwargs.pop("CorrBlank", CorrBlank)
+        self.CorrDiscr: bool = kwargs.pop("CorrDiscr", CorrDiscr)
+        self.Corr37ArDecay: bool = kwargs.pop("Corr37ArDecay", Corr37ArDecay)
+        self.Corr39ArDecay: bool = kwargs.pop("Corr39ArDecay", Corr39ArDecay)
+        self.CorrK: bool = kwargs.pop("CorrK", CorrK)
+        self.CorrCa: bool = kwargs.pop("CorrCa", CorrCa)
+        self.CorrAtm: bool = kwargs.pop("CorrAtm", CorrAtm)
+        self.Corr36ArCl: bool = kwargs.pop("Corr36ArCl", Corr36ArCl)
+        self.RelativeError: bool = kwargs.pop("RelativeError", RelativeError)
+        self.UseDecayConst: bool = kwargs.pop("UseDecayConst", UseDecayConst)
+        self.UseInterceptCorrAtm: bool = kwargs.pop("UseInterceptCorrAtm", UseInterceptCorrAtm)
 
-    def setArgon39(self, data: list):
-        self.argon39 = data
+        self.Ar40vsAr36Trapped: float = kwargs.pop("Ar40vsAr36Trapped", Ar40vsAr36Trapped)
+        self.Ar40vsAr36Cosmo: float = kwargs.pop("Ar40vsAr36Cosmo", Ar40vsAr36Cosmo)
+        self.Ar38vsAr36Trapped: float = kwargs.pop("Ar38vsAr36Trapped", Ar38vsAr36Trapped)
+        self.Ar38vsAr36Cosmo: float = kwargs.pop("Ar38vsAr36Cosmo", Ar38vsAr36Cosmo)
+        self.Ar39vsAr37Ca: float = kwargs.pop("Ar39vsAr37Ca", Ar39vsAr37Ca)
+        self.Ar38vsAr37Ca: float = kwargs.pop("Ar38vsAr37Ca", Ar38vsAr37Ca)
+        self.Ar36vsAr37Ca: float = kwargs.pop("Ar36vsAr37Ca", Ar36vsAr37Ca)
+        self.Ar40vsAr39K: float = kwargs.pop("Ar40vsAr39K", Ar40vsAr39K)
+        self.Ar38vsAr39K: float = kwargs.pop("Ar38vsAr39K", Ar38vsAr39K)
+        self.Ar36vsAr38Cl: float = kwargs.pop("Ar36vsAr38Cl", Ar36vsAr38Cl)
+        self.KvsCaFactor: float = kwargs.pop("KvsCaFactor", KvsCaFactor)
+        self.KvsClFactor: float = kwargs.pop("KvsClFactor", KvsClFactor)
+        self.CavsClFactor: float = kwargs.pop("CavsClFactor", CavsClFactor)
+        self.CavsClFactorError: float = kwargs.pop("CavsClFactorError", CavsClFactorError)
+        self.KvsClFactorError: float = kwargs.pop("KvsClFactorError", KvsClFactorError)
+        self.KvsCaFactorError: float = kwargs.pop("KvsCaFactorError", KvsCaFactorError)
+        self.Ar36vsAr38ClError: float = kwargs.pop("Ar36vsAr38ClError", Ar36vsAr38ClError)
+        self.Ar38vsAr39KError: float = kwargs.pop("Ar38vsAr39KError", Ar38vsAr39KError)
+        self.Ar40vsAr39KError: float = kwargs.pop("Ar40vsAr39KError", Ar40vsAr39KError)
+        self.Ar36vsAr37CaError: float = kwargs.pop("Ar36vsAr37CaError", Ar36vsAr37CaError)
+        self.Ar38vsAr37CaError: float = kwargs.pop("Ar38vsAr37CaError", Ar38vsAr37CaError)
+        self.Ar39vsAr37CaError: float = kwargs.pop("Ar39vsAr37CaError", Ar39vsAr37CaError)
+        self.Ar38vsAr36CosmoError: float = kwargs.pop("Ar38vsAr36CosmoError", Ar38vsAr36CosmoError)
+        self.Ar38vsAr36TrappedError: float = kwargs.pop("Ar38vsAr36TrappedError", Ar38vsAr36TrappedError)
+        self.Ar40vsAr36CosmoError: float = kwargs.pop("Ar40vsAr36CosmoError", Ar40vsAr36CosmoError)
+        self.Ar40vsAr36TrappedError: float = kwargs.pop("Ar40vsAr36TrappedError", Ar40vsAr36TrappedError)
+        self.IrradiationTimeList: list = kwargs.pop("IrradiationTimeList", IrradiationTimeList)
+        self.StandTimeList: list = kwargs.pop("StandTimeList", StandTimeList)
 
-    def setArgon40(self, data: list):
-        self.argon40 = data
+        self.RawFilePath: str = kwargs.pop("RawFilePath", None)
 
-    def sampleName(self):
-        return self.sample_name
+    def readDataFromRawFile(self):
+        res = open_original_xls(self.RawFilePath)
+        if res:
+            self.Ar36MList = res[2]
 
-    def experimentName(self):
-        return self.experiment_name
-
-    def argon36(self):
-        return self.argon36
-
-    def argon37(self):
-        return self.argon37
-
-    def argon38(self):
-        return self.argon38
-
-    def argon39(self):
-        return self.argon39
-
-    def argon40(self):
-        return self.argon40
