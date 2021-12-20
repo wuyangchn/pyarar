@@ -111,9 +111,27 @@ class Sample:
         self.StandTimeList: list = kwargs.pop("StandTimeList", StandTimeList)
 
         self.RawFilePath: str = kwargs.pop("RawFilePath", None)
+        self.FilteredFilePath: str = kwargs.pop("FilteredFilePath", None)
+        self.AgeFilePath: str = kwargs.pop("FilteredFilePath", None)
 
-    def readDataFromRawFile(self):
+    def readDataFromRawFile(self, path=None):
+        if path:
+            self.RawFilePath = path
         res = open_original_xls(self.RawFilePath)
+        if res:
+            self.Ar36MList = res[2]
+
+    def readDataFromFilteredFile(self, path=None):
+        if path:
+            self.FilteredFilePath = path
+        res = open_filtered_xls(self.FilteredFilePath)
+        if res:
+            self.Ar36MList = res[2]
+
+    def readDataFromAgeFile(self, path=None):
+        if path:
+            self.AgeFilePath = path
+        res = open_filtered_xls(self.AgeFilePath)
         if res:
             self.Ar36MList = res[2]
 
