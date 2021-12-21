@@ -9,12 +9,31 @@
 Create a sample instance.
 """
 
+import pickle
+import datetime
 from pyarar.constants import *
 from pyarar.calcFuncs import *
 
 class Sample:
     def __init__(self, **kwargs):
+        """
+        Create a sample instance
 
+            SampleID:
+                unique number of every instance, it is defined based on the datetime the instance was created
+
+            Other sample information:
+                user input
+
+            Calculation Params:
+                user define or inherit from the default
+
+            Attached files:
+                the file path user input
+
+        :param kwargs:
+        """
+        self.SampleID: int = int((datetime.datetime.now() - datetime.datetime(2000, 1, 1)).total_seconds() * 100)
         self.SampleName: str = kwargs.pop("SampleName", None)
         self.SampleOwner: str = kwargs.pop("SampleOwner", None)
         self.SampleType: str = kwargs.pop("SampleType", None)
@@ -131,7 +150,20 @@ class Sample:
     def readDataFromAgeFile(self, path=None):
         if path:
             self.AgeFilePath = path
-        res = open_filtered_xls(self.AgeFilePath)
+        res = open_age_xls(self.AgeFilePath)
         if res:
             self.Ar36MList = res[2]
+
+    def save(self):
+        """
+        Save the instance
+
+            ab: adding to the last of the file if the filename has existed
+            wb: replacing of the present file
+            SampleID is unique for every instance
+
+        :return:
+        """
+        with open('save\\' + str(self.SampleName) + '.sp', 'ab') as f:
+            f.write(pickle.dumps(self))
 

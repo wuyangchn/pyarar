@@ -1020,6 +1020,14 @@ def open_filtered_xls(filepath: str):
         return [dict_intercept, dict_blank]
 
 
+def open_age_xls(filepath: str):
+    """
+    :param filepath:
+    :return:
+    """
+    return False
+
+
 def export_xls_isochron(export_files_path: str, plot_data: dict, label=None):
     """
     :param export_files_path: export file path
