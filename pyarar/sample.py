@@ -17,44 +17,55 @@ from pyarar.calcFuncs import *
 class Sample:
     def __init__(self, **kwargs):
         """
-        Create a sample instance
+        Create a sample instance.
 
-            SampleID:
-                unique number of every instance, it is defined based on the datetime the instance was created
+        parameters
+        ----------
+        SampleID: int, default: None
+            unique number of every instance, it is defined based on the datetime the instance was created.
 
-            Other sample information:
-                user input
+        Other sample information: str, default: None
+            user input.
 
-            Calculation Params:
-                user define or inherit from the default
+        Calculation Params: float or bool, default: constants
+            user define or inherit from the default.
 
-            Attached files:
-                the file path user input
-
-        :param kwargs:
+        Attached files: str
+            the file path user input.
         """
         self.SampleID: int = int((datetime.datetime.now() - datetime.datetime(2000, 1, 1)).total_seconds() * 100)
-        self.SampleName: str = kwargs.pop("SampleName", None)
-        self.SampleOwner: str = kwargs.pop("SampleOwner", None)
-        self.SampleType: str = kwargs.pop("SampleType", None)
-        self.SampleMineral: str = kwargs.pop("SampleMineral", None)
-        self.SampleEstimatedAge: str = kwargs.pop("SampleEstimatedAge", None)
-        self.SampleDescription: str = kwargs.pop("SampleDescription", None)
-        self.SampleLocation: str = kwargs.pop("SampleLocation", None)
-        self.ExperimentName: str = kwargs.pop("ExperimentName", None)
-        self.ExperimentAnalyst: str = kwargs.pop("ExperimentAnalyst", None)
+        self.SampleName: str = kwargs.pop("SampleName", "")
+        self.SampleOwner: str = kwargs.pop("SampleOwner", "")
+        self.SampleType: str = kwargs.pop("SampleType", "")
+        self.SampleMineral: str = kwargs.pop("SampleMineral", "")
+        self.SampleEstimatedAge: str = kwargs.pop("SampleEstimatedAge", "")
+        self.SampleDescription: str = kwargs.pop("SampleDescription", "")
+        self.SampleLocation: str = kwargs.pop("SampleLocation", "")
+        self.ExperimentName: str = kwargs.pop("ExperimentName", "")
+        self.ExperimentAnalyst: str = kwargs.pop("ExperimentAnalyst", "")
 
-        self.Ar36MList: list = kwargs.pop("Ar36MList", None)
-        self.Ar37MList: list = kwargs.pop("Ar37MList", None)
-        self.Ar38MList: list = kwargs.pop("Ar38MList", None)
-        self.Ar39MList: list = kwargs.pop("Ar39MList", None)
-        self.Ar40MList: list = kwargs.pop("Ar40MList", None)
+        self.MSequenceList: list = kwargs.pop("MSequenceList", [])
+        self.BSequenceList: list = kwargs.pop("BSequenceList", [])
 
-        self.Ar36BList: list = kwargs.pop("Ar36BList", None)
-        self.Ar37BList: list = kwargs.pop("Ar37BList", None)
-        self.Ar38BList: list = kwargs.pop("Ar38BList", None)
-        self.Ar39BList: list = kwargs.pop("Ar39BList", None)
-        self.Ar40BList: list = kwargs.pop("Ar40BList", None)
+        self.Ar36MList: list = kwargs.pop("Ar36MList", [])
+        self.Ar37MList: list = kwargs.pop("Ar37MList", [])
+        self.Ar38MList: list = kwargs.pop("Ar38MList", [])
+        self.Ar39MList: list = kwargs.pop("Ar39MList", [])
+        self.Ar40MList: list = kwargs.pop("Ar40MList", [])
+
+        self.Ar36BList: list = kwargs.pop("Ar36BList", [])
+        self.Ar37BList: list = kwargs.pop("Ar37BList", [])
+        self.Ar38BList: list = kwargs.pop("Ar38BList", [])
+        self.Ar39BList: list = kwargs.pop("Ar39BList", [])
+        self.Ar40BList: list = kwargs.pop("Ar40BList", [])
+
+        self._dataList = [self.MSequenceList, self.BSequenceList,
+                          self.Ar36MList, self.Ar37MList, self.Ar38MList, self.Ar39MList, self.Ar40MList,
+                          self.Ar36BList, self.Ar37BList, self.Ar38BList, self.Ar39BList, self.Ar40BList]
+
+        self.RawFilePath: str = kwargs.pop("RawFilePath", "")
+        self.FilteredFilePath: str = kwargs.pop("FilteredFilePath", "")
+        self.AgeFilePath: str = kwargs.pop("FilteredFilePath", "")
 
         self.K40vsKFractions: float = kwargs.pop("K40vsKFractions", K40vsKFractions)
         self.K40vsKFractionsError: float = kwargs.pop("K40vsKFractionsError", K40vsKFractionsError)
@@ -129,11 +140,15 @@ class Sample:
         self.IrradiationTimeList: list = kwargs.pop("IrradiationTimeList", IrradiationTimeList)
         self.StandTimeList: list = kwargs.pop("StandTimeList", StandTimeList)
 
-        self.RawFilePath: str = kwargs.pop("RawFilePath", None)
-        self.FilteredFilePath: str = kwargs.pop("FilteredFilePath", None)
-        self.AgeFilePath: str = kwargs.pop("FilteredFilePath", None)
-
     def readDataFromRawFile(self, path=None):
+        """
+        Read data from raw file.
+
+        parameters
+        ----------
+        path: str
+            raw file path.
+        """
         if path:
             self.RawFilePath = path
         res = open_original_xls(self.RawFilePath)
@@ -141,13 +156,41 @@ class Sample:
             self.Ar36MList = res[2]
 
     def readDataFromFilteredFile(self, path=None):
+        """
+        Read data from filtered file.
+
+        parameters
+        ----------
+        path: str
+            filtered file path.
+        """
+        self._initialize()
         if path:
             self.FilteredFilePath = path
         res = open_filtered_xls(self.FilteredFilePath)
         if res:
-            self.Ar36MList = res[2]
+            for key, value in res[0].items():
+                self.Ar36MList.append(value[2])
+                self.Ar37MList.append(value[5])
+                self.Ar38MList.append(value[8])
+                self.Ar39MList.append(value[11])
+                self.Ar40MList.append(value[14])
+            for key, value in res[1].items():
+                self.Ar36BList.append(value[3])
+                self.Ar37BList.append(value[5])
+                self.Ar38BList.append(value[7])
+                self.Ar39BList.append(value[9])
+                self.Ar40BList.append(value[11])
 
     def readDataFromAgeFile(self, path=None):
+        """
+        Read data from filtered file.
+
+        parameters
+        ----------
+        path: str
+            age file path.
+        """
         if path:
             self.AgeFilePath = path
         res = open_age_xls(self.AgeFilePath)
@@ -156,14 +199,20 @@ class Sample:
 
     def save(self):
         """
-        Save the instance
+        Save the instance.
 
-            ab: adding to the last of the file if the filename has existed
-            wb: replacing of the present file
-            SampleID is unique for every instance
-
-        :return:
+        Notes
+        -----
+        ab: adding to the last of the file if the filename has existed.
+        wb: replacing of the present file.
+        SampleID is unique for every instance.
         """
         with open('save\\' + str(self.SampleName) + '.sp', 'ab') as f:
             f.write(pickle.dumps(self))
 
+    def _initialize(self):
+        """
+        Initialize the data list
+        """
+        for _i in self._dataList:
+            _i = []

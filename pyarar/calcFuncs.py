@@ -993,8 +993,8 @@ def open_filtered_xls(filepath: str):
     :return: list = [dict, dict]
     """
     header = 2
-    wb = xlrd.open_workbook(filepath)
     try:
+        wb = xlrd.open_workbook(filepath)
         sheet_1 = wb.sheet_by_name('Intercept Value')
         sheet_2 = wb.sheet_by_name('Procedure Blanks')
         if sheet_1.nrows != sheet_2.nrows:
