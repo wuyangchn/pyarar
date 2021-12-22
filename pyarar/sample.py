@@ -46,6 +46,8 @@ class Sample:
 
         self.MSequenceList: list = kwargs.pop("MSequenceList", [])
         self.BSequenceList: list = kwargs.pop("BSequenceList", [])
+        self.MStepsList: list = kwargs.pop("MStepsList", [])
+        self.BStepsList: list = kwargs.pop("BStepsList", [])
 
         self.Ar36MList: list = kwargs.pop("Ar36MList", [])
         self.Ar37MList: list = kwargs.pop("Ar37MList", [])
@@ -59,7 +61,7 @@ class Sample:
         self.Ar39BList: list = kwargs.pop("Ar39BList", [])
         self.Ar40BList: list = kwargs.pop("Ar40BList", [])
 
-        self._dataList = [self.MSequenceList, self.BSequenceList,
+        self._dataList = [self.MSequenceList, self.BSequenceList, self.MStepsList, self.BStepsList,
                           self.Ar36MList, self.Ar37MList, self.Ar38MList, self.Ar39MList, self.Ar40MList,
                           self.Ar36BList, self.Ar37BList, self.Ar38BList, self.Ar39BList, self.Ar40BList]
 
@@ -138,7 +140,7 @@ class Sample:
         self.Ar40vsAr36CosmoError: float = kwargs.pop("Ar40vsAr36CosmoError", Ar40vsAr36CosmoError)
         self.Ar40vsAr36TrappedError: float = kwargs.pop("Ar40vsAr36TrappedError", Ar40vsAr36TrappedError)
         self.IrradiationTimeList: list = kwargs.pop("IrradiationTimeList", IrradiationTimeList)
-        self.StandTimeList: list = kwargs.pop("StandTimeList", StandTimeList)
+        self.IrradiationDurationList: list = kwargs.pop("IrradiationDurationList", IrradiationDurationList)
 
     def readDataFromRawFile(self, path=None):
         """
@@ -149,6 +151,7 @@ class Sample:
         path: str
             raw file path.
         """
+        self.initializeData()
         if path:
             self.RawFilePath = path
         res = open_original_xls(self.RawFilePath)
@@ -164,18 +167,22 @@ class Sample:
         path: str
             filtered file path.
         """
-        self._initialize()
+        self.initializeData()
         if path:
             self.FilteredFilePath = path
         res = open_filtered_xls(self.FilteredFilePath)
         if res:
             for key, value in res[0].items():
+                self.MSequenceList.append(value[0])
+                self.MStepsList.append(value[1])
                 self.Ar36MList.append(value[2])
                 self.Ar37MList.append(value[5])
                 self.Ar38MList.append(value[8])
                 self.Ar39MList.append(value[11])
                 self.Ar40MList.append(value[14])
             for key, value in res[1].items():
+                self.BStepsList.append(value[1])
+                self.BSequenceList.append(value[2])
                 self.Ar36BList.append(value[3])
                 self.Ar37BList.append(value[5])
                 self.Ar38BList.append(value[7])
@@ -191,11 +198,130 @@ class Sample:
         path: str
             age file path.
         """
+        self.initializeData()
         if path:
             self.AgeFilePath = path
         res = open_age_xls(self.AgeFilePath)
         if res:
-            self.Ar36MList = res[2]
+            for key, value in res[0].items():
+                self.MSequenceList.append(value[0])
+                self.MStepsList.append(value[1])
+                self.Ar36MList.append(value[2])
+                self.Ar37MList.append(value[5])
+                self.Ar38MList.append(value[8])
+                self.Ar39MList.append(value[11])
+                self.Ar40MList.append(value[14])
+            for key, value in res[1].items():
+                self.BStepsList.append(value[1])
+                self.BSequenceList.append(value[2])
+                self.Ar36BList.append(value[3])
+                self.Ar37BList.append(value[5])
+                self.Ar38BList.append(value[7])
+                self.Ar39BList.append(value[9])
+                self.Ar40BList.append(value[11])
+            book_contents = res[2]
+            # read data
+            data_tables_value = book_contents['Data Tables']
+            # read and rewrite calculation params
+            logs01_params = book_contents['Logs01']
+            # read and rewrite irradiation params
+            self.Ar40vsAr36Trapped = float(data_tables_value[71][5])
+            self.Ar40vsAr36TrappedError = float(data_tables_value[72][5])
+            self.Ar40vsAr36Cosmo = float(data_tables_value[73][5])
+            self.Ar40vsAr36CosmoError = float(data_tables_value[74][5])
+            self.Ar38vsAr36Trapped = float(data_tables_value[75][5])
+            self.Ar38vsAr36TrappedError = float(data_tables_value[76][5])
+            self.Ar38vsAr36Cosmo = float(data_tables_value[77][5])
+            self.Ar38vsAr36CosmoError = float(data_tables_value[78][5])
+            self.Ar39vsAr37Ca = float(data_tables_value[79][5])
+            self.Ar39vsAr37CaError = float(data_tables_value[80][5])
+            self.Ar38vsAr37Ca = float(data_tables_value[81][5])
+            self.Ar38vsAr37CaError = float(data_tables_value[82][5])
+            self.Ar36vsAr37Ca = float(data_tables_value[83][5])
+            self.Ar36vsAr37CaError = float(data_tables_value[84][5])
+            self.Ar40vsAr39K = float(data_tables_value[85][5])
+            self.Ar40vsAr39KError = float(data_tables_value[86][5])
+            self.Ar38vsAr39K = float(data_tables_value[87][5])
+            self.Ar38vsAr39KError = float(data_tables_value[88][5])
+            self.Ar36vsAr38Cl = float(data_tables_value[89][5])
+            self.Ar36vsAr38ClError = float(data_tables_value[90][5])
+            self.KvsCaFactor = float(data_tables_value[91][5])
+            self.KvsCaFactorError = float(data_tables_value[92][5])
+            self.KvsClFactor = float(data_tables_value[93][5])
+            self.KvsClFactorError = float(data_tables_value[95][5])
+            self.CavsClFactor = float(data_tables_value[95][5])
+            self.CavsClFactorError = float(data_tables_value[96][5])
+
+            irradiation_index = book_contents['Logs02'][1].index(data_tables_value[63][5])
+            irradiation_info_list = book_contents['Logs02'][32][irradiation_index].split('\n')
+            print('irradiation_date_list>>>%s' % irradiation_info_list)
+            month_convert = {'JAN': 1, 'FEB': 2, 'MAR': 3, 'APR': 4, 'MAY': 5, 'JUN': 6, 'JUL': 7, 'AUG': 8, 'SEP': 9,
+                             'OCT': 10, 'NOV': 11, 'DEC': 12, 'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5,
+                             'Jun': 6, 'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12}
+            duration_hour = []
+            standing_second = []
+            for each_date in irradiation_info_list:
+                if '/' in each_date:
+                    year = each_date.split(' ')[1].split('/')[2]
+                    month = each_date.split(' ')[1].split('/')[1]
+                    if month in month_convert.keys():
+                        month = month_convert[month]
+                    day = each_date.split(' ')[1].split('/')[0]
+                    hour = each_date.split(' ')[2].split('.')[0]
+                    min = each_date.split(' ')[2].split('.')[1]
+                    standing_second.append(get_datatime(t_year=int(year), t_month=int(month), t_day=int(day),
+                                                        t_hour=int(hour), t_min=int(min)))
+                    each_duration_hour = each_date.split(' ')[0].split('.')[0]
+                    each_duration_min = each_date.split(' ')[0].split('.')[1]
+                    duration_hour.append(int(each_duration_hour) + int(each_duration_min) / 60)
+            self.IrradiationDurationList = duration_hour
+            self.IrradiationTimeList = standing_second
+
+            # read and rewrite calculation params
+            self.K40Const = float(logs01_params[1][36])
+            calc_param['40KConstError'] = float(logs01_params[1][37])
+            calc_param['40K(EC)Const'] = float(logs01_params[1][30])
+            calc_param['40K(EC)ConstError'] = float(logs01_params[1][31])
+            calc_param['40K(β-)Const'] = float(logs01_params[1][32])
+            calc_param['40K(β-)ConstError'] = float(logs01_params[1][33])
+            calc_param['39ArConst'] = float(logs01_params[1][38])
+            calc_param['39ArConstError'] = float(logs01_params[1][39])
+            calc_param['37ArConst'] = float(logs01_params[1][40])
+            calc_param['37ArConstError'] = float(logs01_params[1][41])
+            calc_param['36ClConst'] = float(logs01_params[1][34])
+            calc_param['36ClConstError'] = float(logs01_params[1][35])
+            calc_param['40K(EC)Activity'] = float(logs01_params[1][26])
+            calc_param['40K(EC)ActivityError'] = float(logs01_params[1][27])
+            calc_param['40K(β-)Activity'] = float(logs01_params[1][28])
+            calc_param['40K(β-)ActivityError'] = float(logs01_params[1][29])
+            calc_param['36/38Cl(p)Activity'] = float(logs01_params[1][18])
+            calc_param['36/38Cl(p)ActivityError'] = float(logs01_params[1][19])
+            calc_param['KmassConst'] = float(logs01_params[1][11])
+            calc_param['KmassConstError'] = float(logs01_params[1][12])
+            calc_param['40K/KConst'] = float(logs01_params[1][14])
+            calc_param['40K/KConstError'] = float(logs01_params[1][15])
+            calc_param['35Cl/37ClConst'] = float(logs01_params[1][16])
+            calc_param['35Cl/37ClConstError'] = float(logs01_params[1][17])
+            calc_param['HCl/ClConst'] = float(logs01_params[1][24])
+            calc_param['HCl/ClConstError'] = float(logs01_params[1][25])
+            calc_param['40/36(air)Const'] = float(logs01_params[1][70])
+            calc_param['40/36(air)ConstError'] = float(logs01_params[1][71])
+            calc_param['Corr37ArDecay'] = int(logs01_params[1][6])
+            calc_param['Corr39ArDecay'] = int(logs01_params[1][7])
+            calc_param['Convergence'] = float(logs01_params[1][0])
+            calc_param['Iteration'] = int(logs01_params[1][1])
+            calc_param['Fitting'] = 'York-2'
+
+            calc_param['LinMassDiscrLaw'] = 1 if logs01_params[1][67] == 'LIN' else 0
+            calc_param['ExpMassDiscrLaw'] = 1 if logs01_params[1][67] == 'EXP' else 0
+            calc_param['PowMassDiscrLaw'] = 1 if logs01_params[1][67] == 'POW' else 0
+            calc_param['CorrBlank'] = 1
+
+            calc_param['J_value'] = float(data_tables_value[51][5])
+            calc_param['J_error'] = float(data_tables_value[52][5])
+            calc_param['MDF'] = float(data_tables_value[53][5])
+            calc_param['sMDF'] = float(data_tables_value[54][5])
+
 
     def save(self):
         """
@@ -210,7 +336,7 @@ class Sample:
         with open('save\\' + str(self.SampleName) + '.sp', 'ab') as f:
             f.write(pickle.dumps(self))
 
-    def _initialize(self):
+    def initializeData(self):
         """
         Initialize the data list
         """

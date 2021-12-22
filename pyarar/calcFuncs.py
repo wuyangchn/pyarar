@@ -44,9 +44,12 @@ Important Constants:
     Ar37: Half_Life = 35.0 d
     Ar39: Half_Life = 269 a
 """
+import os
 import json
 import xlrd
 import xlsxwriter
+import msoffcrypto
+from xlwt import Workbook as write_workbook
 from numpy import random
 from math import exp, log, atan, tan, cos, sin
 from math import pi as _pi
@@ -1025,7 +1028,98 @@ def open_age_xls(filepath: str):
     :param filepath:
     :return:
     """
-    return False
+    if filepath and '.age' in filepath:
+        print('打开Age文件，文件路径：%s' % (str(filepath)))
+        for text in str(filepath).split('/'):
+            if '.age' in text:
+                file_name = text.split('.age')[0]
+                decrypt_file_path = str(filepath).split('.age')[0] + '_decrypt.xls'
+        # 读取excel数据表
+        try:
+            with open(filepath, 'rb') as age_file:
+                office_file = msoffcrypto.OfficeFile(age_file)
+                office_file.load_key(password='aapkop')
+                office_file.decrypt(open(decrypt_file_path, 'wb'))
+            wb = xlrd.open_workbook(decrypt_file_path)
+            # 获取sheet名字，得到名字列表
+            worksheets = wb.sheet_names()
+            # 按名字打开读取sheet
+            book_contents = dict()
+            for each_sheet in worksheets:
+                sheet = wb.sheet_by_name(each_sheet)
+                sheet_contents = []
+                for col in range(sheet.ncols):
+                    each_col_contents = []
+                    for row in range(sheet.nrows):
+                        each_col_contents.append(sheet.cell(row, col).value)
+                    sheet_contents.append(each_col_contents)
+                book_contents[each_sheet] = sheet_contents
+            os.remove(decrypt_file_path)
+        except Exception as error_info:
+            print('Error info: {}'.format(error_info))
+            return False
+    else:
+        return
+    # read data
+    data_tables_value = book_contents['Data Tables']
+    # read and rewrite calculation params
+    logs01_params = book_contents['Logs01']
+
+    # 读取本地和截距值列表
+    wb = write_workbook()
+    sheet_intercept = wb.add_sheet('Intercept Value', cell_overwrite_ok=True)
+    sheet_blank = wb.add_sheet('Procedure Blanks', cell_overwrite_ok=True)
+    sheet_intercept_header = ['Intercept Value', '', '36Ar[fA]', '1σ', 'r2',
+                              '37Ar[fA]', '1σ', 'r2', '38Ar[fA]', '1σ', 'r2',
+                              '39Ar[fA]', '1σ', 'r2', '40Ar[fA]', '1σ', 'r2',
+                              'Day', 'Mouth', 'Year', 'Hour', 'Min']
+    sheet_blank_header = ['Procedure Blanks', '', 'Real Procedure Blanks', '36Ar[fA]', '1σ', '37Ar[fA]', '1σ',
+                          '38Ar[fA]', '1σ', '39Ar[fA]', '1σ', '40Ar[fA]', '1σ', 'Day', 'Mouth', 'Year', 'Hour',
+                          'Min']
+    # rows_unm-->样品阶段数
+    rows_num = len(set(book_contents['Data Tables'][1])) - 2
+    # intercept value
+    data_tables_value = book_contents['Data Tables']
+
+    month_convert = {'JAN': 1, 'FEB': 2, 'MAR': 3, 'APR': 4, 'MAY': 5, 'JUN': 6, 'JUL': 7, 'AUG': 8, 'SEP': 9,
+                     'OCT': 10, 'NOV': 11, 'DEC': 12, 'Jan': 1, 'Feb': 2, 'Mar': 3, 'Apr': 4, 'May': 5, 'Jun': 6,
+                     'Jul': 7, 'Aug': 8, 'Sep': 9, 'Oct': 10, 'Nov': 11, 'Dec': 12}
+    # write intercept
+    for j in range(0, 22):
+        sheet_intercept.write(0, j, sheet_intercept_header[j])
+    for i in range(2, rows_num + 2):
+        for j in range(0, 2):
+            sheet_intercept.write(i, j, data_tables_value[j + 14][i + 3])
+        for j in range(2, 5):
+            sheet_intercept.write(i, j, data_tables_value[j + 14][i + 3])
+        for j in range(5, 17):
+            sheet_intercept.write(i, j, data_tables_value[j + 14 + (j - 2) // 3 * 2][i + 3])
+        for j in range(17, 22):
+            if j == 18:
+                month_str = data_tables_value[j + 40][i + 3]
+                month_int = month_convert[month_str] if month_str in month_convert.keys() else month_str
+                sheet_intercept.write(i, j, month_int)
+            else:
+                sheet_intercept.write(i, j, data_tables_value[j + 40][i + 3])
+    # write blank
+    for j in range(0, 18):
+            sheet_blank.write(0, j, sheet_blank_header[j])
+    for i in range(2, rows_num + 2):
+        for j in range(0, 2):
+            sheet_blank.write(i, j, data_tables_value[j + 1][i + 3])
+        for j in range(3, 13):
+            sheet_blank.write(i, j, data_tables_value[j][i + 3])
+    # save file
+    filtered_file_path = str(filepath).split('.age')[0] + '_new_filter.xls'
+    try:
+        wb.save(filtered_file_path)
+    except PermissionError:
+        print('file has already been opened, overwriting is forbidden')
+        return False
+    [dict_intercept, dict_blank] = open_filtered_xls(filtered_file_path)
+    # delete filtered file
+    os.remove(filtered_file_path)
+    return dict_intercept, dict_blank, book_contents
 
 
 def export_xls_isochron(export_files_path: str, plot_data: dict, label=None):
