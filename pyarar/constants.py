@@ -28,10 +28,10 @@ Cl36Const = 0.000002257
 Cl36ConstError = 0.000000015
 K40ECActivity = 3.310
 K40ECActivityError = 0.040
-K40AlphaNActivity = 28.270
-K40AlphaNActivityError = 0.050
-K40AlphaPActivity = 0
-K40AlphaPActivityError = 0
+K40BetaNActivity = 28.270
+K40BetaNActivityError = 0.050
+K40BetaPActivity = 0
+K40BetaPActivityError = 0
 Cl36vs38Activity = 0
 Cl36vs38ActivityError = 0
 NoConst = 0
@@ -48,6 +48,8 @@ Cl35vsClFractions = 3.08663
 Cl35vsClFractionsError = 2
 HClvsClFractions = 0.2
 HClvsClFractionsError = 20
+Ar40vsAr36AirConst = 298.56
+Ar40vsAr36AirConstError = 0.1
 K40Mass = 39.0983
 K40MassError = 0.0001
 Ar36Mass = 35.96754628
@@ -64,7 +66,7 @@ Ar40MassError = 0
 """=============="""
 """Special Params"""
 """=============="""
-JValue = 0.015150673
+JValue = 0.01
 JValueError = 0.5
 MDF = 0.995573
 MDFError = 0.1
@@ -84,10 +86,11 @@ Corr39ArDecay = True
 CorrK = True
 CorrCa = True
 CorrAtm = True
-Corr36ArCl = True
+Corr36ClDecay = True
 RelativeError = True
 UseDecayConst = False
 UseInterceptCorrAtm = False
+UseMinCalculation = True
 
 Ar40vsAr36Trapped = 298.56
 Ar40vsAr36Cosmo = 0.018

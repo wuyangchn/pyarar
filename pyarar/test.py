@@ -5,14 +5,18 @@
 # @Date   : 2021/12/19
 # @Email  : wuy@cug.edu.cn
 
-from pyarar.sample import Sample
+import pyarar
 import pickle
-b = Sample(SampleName='19HN34')
-b.RawFilePath = "C:\\Users\\Young\\Projects\\2019-04Ar-Ar数据处理\\examples\\06excel\\19WHA0108.xls"
-b.FilteredFilePath = "C:\\Users\\Young\\Projects\\2019-04Ar-Ar数据处理\\filtered_file\\19WHA0108.xls"
+b = pyarar.sample.Sample(SampleName='19WHA0106')
+b.RawFilePath = "C:\\Users\\Young\\Projects\\2019-04Ar-Ar数据处理\\examples\\06excel\\19WHA0106.xls"
+b.FilteredFilePath = "C:\\Users\\Young\\Projects\\2019-04Ar-Ar数据处理\\filtered_file\\19WHA0106.xls"
+b.AgeFilePath = "C:\\Users\\Young\\Projects\\2019-04Ar-Ar数据处理\\examples\\06age\\19WHA0106.age"
 b.readDataFromFilteredFile()
 print(b.Ar40MList)
-print(b.res1)
+print(b.JValue)
+b.readDataFromAgeFile()
+print(b.Ar40MList)
+print(b.JValue)
 b.save()
 print(b.SampleID)
 
@@ -24,12 +28,9 @@ with open('save\\' + str(b.SampleName) + '.sp', 'rb') as f:
     except EOFError:
         print('Ran out of input, total instances: {}'.format(len(res)))
 
-for i in res:
-    print(i.SampleID)
-    i.SampleID = 1000001
-
 if res:
-    print(res[0].SampleID)
+    for i in res:
+        print(i.SampleID)
 
 intercept = ['19WHA0108-2',
              '10',

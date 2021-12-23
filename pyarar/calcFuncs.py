@@ -1029,7 +1029,7 @@ def open_age_xls(filepath: str):
     :return:
     """
     if filepath and '.age' in filepath:
-        print('打开Age文件，文件路径：%s' % (str(filepath)))
+        print('open .age file，path: %s' % (str(filepath)))
         for text in str(filepath).split('/'):
             if '.age' in text:
                 file_name = text.split('.age')[0]
@@ -1059,11 +1059,8 @@ def open_age_xls(filepath: str):
             print('Error info: {}'.format(error_info))
             return False
     else:
+        print('Not a .age file opened')
         return
-    # read data
-    data_tables_value = book_contents['Data Tables']
-    # read and rewrite calculation params
-    logs01_params = book_contents['Logs01']
 
     # 读取本地和截距值列表
     wb = write_workbook()
@@ -1103,7 +1100,7 @@ def open_age_xls(filepath: str):
                 sheet_intercept.write(i, j, data_tables_value[j + 40][i + 3])
     # write blank
     for j in range(0, 18):
-            sheet_blank.write(0, j, sheet_blank_header[j])
+        sheet_blank.write(0, j, sheet_blank_header[j])
     for i in range(2, rows_num + 2):
         for j in range(0, 2):
             sheet_blank.write(i, j, data_tables_value[j + 1][i + 3])
@@ -1119,7 +1116,27 @@ def open_age_xls(filepath: str):
     [dict_intercept, dict_blank] = open_filtered_xls(filtered_file_path)
     # delete filtered file
     os.remove(filtered_file_path)
-    return dict_intercept, dict_blank, book_contents
+
+    irradiation_index = book_contents['Logs02'][1].index(data_tables_value[63][5])
+    irradiation_info_list = book_contents['Logs02'][32][irradiation_index].split('\n')
+    duration_hour = []
+    standing_second = []
+    for each_date in irradiation_info_list:
+        if '/' in each_date:
+            _year = each_date.split(' ')[1].split('/')[2]
+            _month = each_date.split(' ')[1].split('/')[1]
+            if _month in month_convert.keys():
+                _month = month_convert[_month]
+            _day = each_date.split(' ')[1].split('/')[0]
+            _hour = each_date.split(' ')[2].split('.')[0]
+            _min = each_date.split(' ')[2].split('.')[1]
+            standing_second.append(get_datatime(t_year=int(_year), t_month=int(_month), t_day=int(_day),
+                                                t_hour=int(_hour), t_min=int(_min)))
+            each_duration_hour = each_date.split(' ')[0].split('.')[0]
+            each_duration_min = each_date.split(' ')[0].split('.')[1]
+            duration_hour.append(int(each_duration_hour) + int(each_duration_min) / 60)
+
+    return dict_intercept, dict_blank, book_contents, duration_hour, standing_second
 
 
 def export_xls_isochron(export_files_path: str, plot_data: dict, label=None):
