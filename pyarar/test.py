@@ -7,7 +7,7 @@
 
 import pyarar
 import pickle
-b = pyarar.sample.Sample(SampleName='19WHA0106')
+b = pyarar.sample.Sample(SampleName='2021-12-25')
 b.RawFilePath = "C:\\Users\\Young\\Projects\\2019-04Ar-Ar数据处理\\examples\\06excel\\19WHA0106.xls"
 b.FilteredFilePath = "C:\\Users\\Young\\Projects\\2019-04Ar-Ar数据处理\\filtered_file\\19WHA0106.xls"
 b.AgeFilePath = "C:\\Users\\Young\\Projects\\2019-04Ar-Ar数据处理\\examples\\06age\\19WHA0106.age"
@@ -19,6 +19,11 @@ print(b.Ar40MList)
 print(b.JValue)
 b.save()
 print(b.SampleID)
+
+print(b.Ar36TempList)
+pyarar.maincalc.corrBlank(b)
+
+print(b.Ar36TempList)
 
 res = []
 with open('save\\' + str(b.SampleName) + '.sp', 'rb') as f:

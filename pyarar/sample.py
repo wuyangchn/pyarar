@@ -57,11 +57,35 @@ class Sample:
         self.Ar39MList: list = kwargs.pop("Ar39MList", [])
         self.Ar40MList: list = kwargs.pop("Ar40MList", [])
 
+        self.Ar36MErrorList: list = kwargs.pop("Ar36MErrorList", [])
+        self.Ar37MErrorList: list = kwargs.pop("Ar37MErrorList", [])
+        self.Ar38MErrorList: list = kwargs.pop("Ar38MErrorList", [])
+        self.Ar39MErrorList: list = kwargs.pop("Ar39MErrorList", [])
+        self.Ar40MErrorList: list = kwargs.pop("Ar40MErrorList", [])
+
         self.Ar36BList: list = kwargs.pop("Ar36BList", [])
         self.Ar37BList: list = kwargs.pop("Ar37BList", [])
         self.Ar38BList: list = kwargs.pop("Ar38BList", [])
         self.Ar39BList: list = kwargs.pop("Ar39BList", [])
         self.Ar40BList: list = kwargs.pop("Ar40BList", [])
+
+        self.Ar36BErrorList: list = kwargs.pop("Ar36BErrorList", [])
+        self.Ar37BErrorList: list = kwargs.pop("Ar37BErrorList", [])
+        self.Ar38BErrorList: list = kwargs.pop("Ar38BErrorList", [])
+        self.Ar39BErrorList: list = kwargs.pop("Ar39BErrorList", [])
+        self.Ar40BErrorList: list = kwargs.pop("Ar40BErrorList", [])
+
+        self.Ar36TempList: list = kwargs.pop("Ar36TempList", [])
+        self.Ar37TempList: list = kwargs.pop("Ar37TempList", [])
+        self.Ar38TempList: list = kwargs.pop("Ar38TempList", [])
+        self.Ar39TempList: list = kwargs.pop("Ar39TempList", [])
+        self.Ar40TempList: list = kwargs.pop("Ar40TempList", [])
+
+        self.Ar36TempErrorList: list = kwargs.pop("Ar36TempErrorList", [])
+        self.Ar37TempErrorList: list = kwargs.pop("Ar37TempErrorList", [])
+        self.Ar38TempErrorList: list = kwargs.pop("Ar38TempErrorList", [])
+        self.Ar39TempErrorList: list = kwargs.pop("Ar39TempErrorList", [])
+        self.Ar40TempErrorList: list = kwargs.pop("Ar40TempErrorList", [])
 
         self.Ar36DegassCa: list = kwargs.pop("Ar36DegassCa", [])
         self.Ar36DegassK: list = kwargs.pop("Ar36DegassK", [])
@@ -85,9 +109,27 @@ class Sample:
         self.Ar40DegassAir: list = kwargs.pop("Ar40DegassAir", [])
         self.Ar40DegassR: list = kwargs.pop("Ar40DegassR", [])
 
-        self._dataList = [self.MSequenceList, self.BSequenceList, self.MStepsList, self.BStepsList,
-                          self.Ar36MList, self.Ar37MList, self.Ar38MList, self.Ar39MList, self.Ar40MList,
-                          self.Ar36BList, self.Ar37BList, self.Ar38BList, self.Ar39BList, self.Ar40BList]
+        self.Ar36DegassCaError: list = kwargs.pop("Ar36DegassCaError", [])
+        self.Ar36DegassKError: list = kwargs.pop("Ar36DegassKError", [])
+        self.Ar36DegassClError: list = kwargs.pop("Ar36DegassClError", [])
+        self.Ar36DegassAirError: list = kwargs.pop("Ar36DegassAirError", [])
+        self.Ar37DegassCaError: list = kwargs.pop("Ar37DegassCaError", [])
+        self.Ar37DegassKError: list = kwargs.pop("Ar37DegassKError", [])
+        self.Ar37DegassClError: list = kwargs.pop("Ar37DegassClError", [])
+        self.Ar37DegassAirError: list = kwargs.pop("Ar37DegassAirError", [])
+        self.Ar38DegassCaError: list = kwargs.pop("Ar38DegassCaError", [])
+        self.Ar38DegassKError: list = kwargs.pop("Ar38DegassKError", [])
+        self.Ar38DegassClError: list = kwargs.pop("Ar38DegassClError", [])
+        self.Ar38DegassAirError: list = kwargs.pop("Ar38DegassAirError", [])
+        self.Ar39DegassCaError: list = kwargs.pop("Ar39DegassCaError", [])
+        self.Ar39DegassKError: list = kwargs.pop("Ar39DegassKError", [])
+        self.Ar39DegassClError: list = kwargs.pop("Ar39DegassClError", [])
+        self.Ar39DegassAirError: list = kwargs.pop("Ar39DegassAirError", [])
+        self.Ar40DegassCaError: list = kwargs.pop("Ar40DegassCaError", [])
+        self.Ar40DegassKError: list = kwargs.pop("Ar40DegassKError", [])
+        self.Ar40DegassClError: list = kwargs.pop("Ar40DegassClError", [])
+        self.Ar40DegassAirError: list = kwargs.pop("Ar40DegassAirError", [])
+        self.Ar40DegassRError: list = kwargs.pop("Ar40DegassRError", [])
 
         self.RawFilePath: str = kwargs.pop("RawFilePath", "")
         self.FilteredFilePath: str = kwargs.pop("FilteredFilePath", "")
@@ -210,7 +252,8 @@ class Sample:
             self.RawFilePath = path
         res = open_original_xls(self.RawFilePath)
         if res:
-            self.Ar36MList = res[2]
+            pass
+            # self.Ar36MList = res[2]
 
     def readDataFromFilteredFile(self, path=None):
         """
@@ -226,22 +269,35 @@ class Sample:
             self.FilteredFilePath = path
         res = open_filtered_xls(self.FilteredFilePath)
         if res:
-            for key, value in res[0].items():
-                self.MSequenceList.append(value[0])
-                self.MStepsList.append(value[1])
-                self.Ar36MList.append(value[2])
-                self.Ar37MList.append(value[5])
-                self.Ar38MList.append(value[8])
-                self.Ar39MList.append(value[11])
-                self.Ar40MList.append(value[14])
-            for key, value in res[1].items():
-                self.BStepsList.append(value[1])
-                self.BSequenceList.append(value[2])
-                self.Ar36BList.append(value[3])
-                self.Ar37BList.append(value[5])
-                self.Ar38BList.append(value[7])
-                self.Ar39BList.append(value[9])
-                self.Ar40BList.append(value[11])
+            self._readFilteredFile(res)
+
+    def _readFilteredFile(self, res):
+        for key, value in res[0].items():
+            self.MSequenceList.append(value[0])
+            self.MStepsList.append(value[1])
+            self.Ar36MList.append(value[2])
+            self.Ar37MList.append(value[5])
+            self.Ar38MList.append(value[8])
+            self.Ar39MList.append(value[11])
+            self.Ar40MList.append(value[14])
+            self.Ar36MErrorList.append(value[3])
+            self.Ar37MErrorList.append(value[6])
+            self.Ar38MErrorList.append(value[9])
+            self.Ar39MErrorList.append(value[12])
+            self.Ar40MErrorList.append(value[15])
+        for key, value in res[1].items():
+            self.BStepsList.append(value[1])
+            self.BSequenceList.append(value[2])
+            self.Ar36BList.append(value[3])
+            self.Ar37BList.append(value[5])
+            self.Ar38BList.append(value[7])
+            self.Ar39BList.append(value[9])
+            self.Ar40BList.append(value[11])
+            self.Ar36BErrorList.append(value[4])
+            self.Ar37BErrorList.append(value[6])
+            self.Ar38BErrorList.append(value[8])
+            self.Ar39BErrorList.append(value[10])
+            self.Ar40BErrorList.append(value[12])
 
     def readDataFromAgeFile(self, path=None):
         """
@@ -257,22 +313,7 @@ class Sample:
             self.AgeFilePath = path
         res = open_age_xls(self.AgeFilePath)
         if res:
-            for key, value in res[0].items():
-                self.MSequenceList.append(value[0])
-                self.MStepsList.append(value[1])
-                self.Ar36MList.append(value[2])
-                self.Ar37MList.append(value[5])
-                self.Ar38MList.append(value[8])
-                self.Ar39MList.append(value[11])
-                self.Ar40MList.append(value[14])
-            for key, value in res[1].items():
-                self.BStepsList.append(value[1])
-                self.BSequenceList.append(value[2])
-                self.Ar36BList.append(value[3])
-                self.Ar37BList.append(value[5])
-                self.Ar38BList.append(value[7])
-                self.Ar39BList.append(value[9])
-                self.Ar40BList.append(value[11])
+            self._readFilteredFile(res)
             self.IrradiationDurationList = res[3]
             self.IrradiationTimeList = res[4]
             book_contents = res[2]
@@ -372,5 +413,24 @@ class Sample:
         """
         Initialize the data list
         """
-        for each_list in self._dataList:
+        _dataList = [self.MSequenceList, self.BSequenceList, self.MStepsList, self.BStepsList,
+                     self.Ar36MList, self.Ar37MList, self.Ar38MList, self.Ar39MList, self.Ar40MList,
+                     self.Ar36MErrorList, self.Ar37MErrorList, self.Ar38MErrorList, self.Ar39MErrorList,
+                     self.Ar40MErrorList,
+                     self.Ar36BList, self.Ar37BList, self.Ar38BList, self.Ar39BList, self.Ar40BList,
+                     self.Ar36BErrorList, self.Ar37BErrorList, self.Ar38BErrorList, self.Ar39BErrorList,
+                     self.Ar40BErrorList,
+                     self.Ar36DegassCa, self.Ar36DegassK, self.Ar36DegassCl, self.Ar36DegassAir,
+                     self.Ar37DegassCa, self.Ar37DegassK, self.Ar37DegassCl, self.Ar37DegassAir,
+                     self.Ar38DegassCa, self.Ar38DegassK, self.Ar38DegassCl, self.Ar38DegassAir,
+                     self.Ar39DegassCa, self.Ar39DegassK, self.Ar39DegassCl, self.Ar39DegassAir,
+                     self.Ar40DegassCa, self.Ar40DegassK, self.Ar40DegassCl, self.Ar40DegassAir,
+                     self.Ar40DegassR,
+                     self.Ar36DegassCaError, self.Ar36DegassKError, self.Ar36DegassClError, self.Ar36DegassAirError,
+                     self.Ar37DegassCaError, self.Ar37DegassKError, self.Ar37DegassClError, self.Ar37DegassAirError,
+                     self.Ar38DegassCaError, self.Ar38DegassKError, self.Ar38DegassClError, self.Ar38DegassAirError,
+                     self.Ar39DegassCaError, self.Ar39DegassKError, self.Ar39DegassClError, self.Ar39DegassAirError,
+                     self.Ar40DegassCaError, self.Ar40DegassKError, self.Ar40DegassClError, self.Ar40DegassAirError,
+                     self.Ar40DegassRError]
+        for each_list in _dataList:
             each_list.clear()
