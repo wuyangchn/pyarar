@@ -21,6 +21,43 @@ def corrBlank(sp: sample.Sample):
         sp.Ar40TempList, sp.Ar40TempErrorList \
             = ProFunctions.corr_blank(sp.Ar40MList, sp.Ar40MErrorList, sp.Ar40BList, sp.Ar40BErrorList)
 
+def corrDiscr(sp: sample.Sample):
+    def _func(a0, e0, f):
+        k1 = [ProFunctions.error_mul((a0[i], e0[i]), (f[0], f[1])) for i in range(len(a0))]
+        k0 = [a0[i] * f[0] for i in range(len(a0))]
+        return k0, k1
+    if sp.CorrDiscr:
+        # Mass Discrimination based on the mass of Ar40, Ar36 | Ar37 | Ar38 | Ar39
+        MDF, sMDF = sp.MDF, sp.MDFError
+        M36, M37, M38, M39, M40 = sp.Ar36Mass, sp.Ar37Mass, sp.Ar38Mass, sp.Ar39Mass, sp.Ar40Mass
+        c = ProFunctions.corr_discr(MDF, MDF * sMDF / 100, M36, M40)  # 36Ar
+        sp.Ar36TempList, sp.Ar36TempErrorList = _func(sp.Ar36TempList, sp.Ar36TempErrorList, c)
+        c = ProFunctions.corr_discr(MDF, MDF * sMDF / 100, M37, M40)  # 37Ar
+        sp.Ar37TempList, sp.Ar37TempErrorList = _func(sp.Ar37TempList, sp.Ar37TempErrorList, c)
+        c = ProFunctions.corr_discr(MDF, MDF * sMDF / 100, M38, M40)  # 38Ar
+        sp.Ar38TempList, sp.Ar38TempErrorList = _func(sp.Ar38TempList, sp.Ar38TempErrorList, c)
+        c = ProFunctions.corr_discr(MDF, MDF * sMDF / 100, M39, M40)  # 39Ar
+        sp.Ar39TempList, sp.Ar39TempErrorList = _func(sp.Ar39TempList, sp.Ar39TempErrorList, c)
+
+def corrDecay(sp: sample.Sample):
+    def _func(a0, e0, f):
+        k1 = ProFunctions.error_mul((a0, e0), (f[0], f[1]))
+        k0 = a0 * f[0]
+        return k0, k1
+    # Decay Correction
+    t2 = sp.IrradiationEndTimeList  # irradiation end time in second
+    t3 = sp.IrradiationDurationList  # irradiation duration time in hour
+    if sp.Corr37ArDecay:
+        for row in range(len(sp.Ar37TempList)):
+            c = ProFunctions.corr_decay(sp.MDateTimeList[row], t2, t3, sp.Ar37Const, sp.Ar37ConstError)  # 37Ar
+            sp.Ar37TempList[row], sp.Ar37TempErrorList[row] \
+                = _func(sp.Ar37TempList[row], sp.Ar37TempErrorList[row], c)
+    if sp.Corr39ArDecay:
+        for row in range(len(sp.Ar39TempList)):
+            c = ProFunctions.corr_decay(sp.MDateTimeList[row], t2, t3, sp.Ar39Const, sp.Ar39ConstError)  # 39Ar
+            sp.Ar39TempList[row], sp.Ar39TempErrorList[row] \
+                = _func(sp.Ar39TempList[row], sp.Ar39TempErrorList[row], c)
+
 def correctFunc(self, all_param):
     # 初始化
     print('运行CorrectFunc')
@@ -86,16 +123,16 @@ def correctFunc(self, all_param):
     # 基于40Ar的质量歧视
     print('质量歧视校正')
     # Mass Discrimination, Ar36 | Ar37 | Ar38 | Ar39
-    c = ProFunctions.corr_discrimination(MDF, MDF * sMDF / 100, M36, M40) if CorrDiscr else [1, 0]  # 36Ar
+    c = ProFunctions.corr_discr(MDF, MDF * sMDF / 100, M36, M40) if CorrDiscr else [1, 0]  # 36Ar
     result[3] = [ProFunctions.error_mul((result[2][i], result[3][i]), (c[0], c[1])) for i in range(len(result[2]))]
     result[2] = [result[2][i] * c[0] for i in range(len(result[2]))]
-    c = ProFunctions.corr_discrimination(MDF, MDF * sMDF / 100, M37, M40) if CorrDiscr else [1, 0]  # 37Ar
+    c = ProFunctions.corr_discr(MDF, MDF * sMDF / 100, M37, M40) if CorrDiscr else [1, 0]  # 37Ar
     result[5] = [ProFunctions.error_mul((result[4][i], result[5][i]), (c[0], c[1])) for i in range(len(result[4]))]
     result[4] = [result[4][i] * c[0] for i in range(len(result[4]))]
-    c = ProFunctions.corr_discrimination(MDF, MDF * sMDF / 100, M38, M40) if CorrDiscr else [1, 0]  # 38Ar
+    c = ProFunctions.corr_discr(MDF, MDF * sMDF / 100, M38, M40) if CorrDiscr else [1, 0]  # 38Ar
     result[7] = [ProFunctions.error_mul((result[6][i], result[7][i]), (c[0], c[1])) for i in range(len(result[6]))]
     result[6] = [result[6][i] * c[0] for i in range(len(result[6]))]
-    c = ProFunctions.corr_discrimination(MDF, MDF * sMDF / 100, M39, M40) if CorrDiscr else [1, 0]  # 39Ar
+    c = ProFunctions.corr_discr(MDF, MDF * sMDF / 100, M39, M40) if CorrDiscr else [1, 0]  # 39Ar
     result[9] = [ProFunctions.error_mul((result[8][i], result[9][i]), (c[0], c[1])) for i in range(len(result[8]))]
     result[8] = [result[8][i] * c[0] for i in range(len(result[8]))]
     # 37Ar和39Ar的衰变校正

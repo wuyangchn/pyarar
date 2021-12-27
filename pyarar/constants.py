@@ -118,5 +118,5 @@ Ar38vsAr36CosmoError = 3
 Ar38vsAr36TrappedError = 0
 Ar40vsAr36CosmoError = 35
 Ar40vsAr36TrappedError = 0
-IrradiationTimeList = [1522797300, 1522798400]
+IrradiationEndTimeList = [1522797300, 1522798400]
 IrradiationDurationList = [38.0, 40.0]

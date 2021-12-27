@@ -139,7 +139,7 @@ def corr_blank(a0: list, e0: list, a1: list, e1: list):
     return k0, k1
 
 
-def corr_discrimination(mdf: float, smdf: float, m: float, m40: float = M40):
+def corr_discr(mdf: float, smdf: float, m: float, m40: float = M40):
     """
     :param mdf: mass discrimination factor(MDF)
     :param smdf: absolute error of MDF
@@ -167,7 +167,8 @@ def corr_decay(t1: list, t2: list, t3: list, f: float, rsf: float, unit: str = '
     v2 = []
     e1 = []
     sf = f * rsf / 100  # change to absolute error
-    t_year, t_month, t_day, t_hour, t_min = t1
+    # t_year, t_month, t_day, t_hour, t_min = t1
+    t_day, t_month, t_year, t_hour, t_min = t1
     t_test_start = get_datatime(t_year, t_month, t_day, t_hour, t_min)  # the time when analysis was starting
     k2 = [t_test_start - i for i in t2]  # standing time in second between irradiation and analysing
 
@@ -1120,7 +1121,7 @@ def open_age_xls(filepath: str):
     irradiation_index = book_contents['Logs02'][1].index(data_tables_value[63][5])
     irradiation_info_list = book_contents['Logs02'][32][irradiation_index].split('\n')
     duration_hour = []
-    standing_second = []
+    end_time_second = []
     for each_date in irradiation_info_list:
         if '/' in each_date:
             _year = each_date.split(' ')[1].split('/')[2]
@@ -1130,13 +1131,13 @@ def open_age_xls(filepath: str):
             _day = each_date.split(' ')[1].split('/')[0]
             _hour = each_date.split(' ')[2].split('.')[0]
             _min = each_date.split(' ')[2].split('.')[1]
-            standing_second.append(get_datatime(t_year=int(_year), t_month=int(_month), t_day=int(_day),
+            end_time_second.append(get_datatime(t_year=int(_year), t_month=int(_month), t_day=int(_day),
                                                 t_hour=int(_hour), t_min=int(_min)))
             each_duration_hour = each_date.split(' ')[0].split('.')[0]
             each_duration_min = each_date.split(' ')[0].split('.')[1]
             duration_hour.append(int(each_duration_hour) + int(each_duration_min) / 60)
 
-    return dict_intercept, dict_blank, book_contents, duration_hour, standing_second
+    return dict_intercept, dict_blank, book_contents, duration_hour, end_time_second
 
 
 def export_xls_isochron(export_files_path: str, plot_data: dict, label=None):

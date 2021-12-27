@@ -50,6 +50,7 @@ class Sample:
         self.BSequenceList: list = kwargs.pop("BSequenceList", [])
         self.MStepsList: list = kwargs.pop("MStepsList", [])
         self.BStepsList: list = kwargs.pop("BStepsList", [])
+        self.MDateTimeList: list = kwargs.pop("MDateTimeList", [])  # [day, mouth, year, hour, min]
 
         self.Ar36MList: list = kwargs.pop("Ar36MList", [])
         self.Ar37MList: list = kwargs.pop("Ar37MList", [])
@@ -235,7 +236,7 @@ class Sample:
         self.Ar38vsAr36TrappedError: float = kwargs.pop("Ar38vsAr36TrappedError", Ar38vsAr36TrappedError)
         self.Ar40vsAr36CosmoError: float = kwargs.pop("Ar40vsAr36CosmoError", Ar40vsAr36CosmoError)
         self.Ar40vsAr36TrappedError: float = kwargs.pop("Ar40vsAr36TrappedError", Ar40vsAr36TrappedError)
-        self.IrradiationTimeList: list = kwargs.pop("IrradiationTimeList", IrradiationTimeList)
+        self.IrradiationEndTimeList: list = kwargs.pop("IrradiationEndTimeList", IrradiationEndTimeList)
         self.IrradiationDurationList: list = kwargs.pop("IrradiationDurationList", IrradiationDurationList)
 
     def readDataFromRawFile(self, path=None):
@@ -285,6 +286,7 @@ class Sample:
             self.Ar38MErrorList.append(value[9])
             self.Ar39MErrorList.append(value[12])
             self.Ar40MErrorList.append(value[15])
+            self.MDateTimeList.append([int(_i) for _i in value[17:22]])
         for key, value in res[1].items():
             self.BStepsList.append(value[1])
             self.BSequenceList.append(value[2])
@@ -315,7 +317,7 @@ class Sample:
         if res:
             self._readFilteredFile(res)
             self.IrradiationDurationList = res[3]
-            self.IrradiationTimeList = res[4]
+            self.IrradiationEndTimeList = res[4]
             book_contents = res[2]
             # read data
             data_tables_value = book_contents['Data Tables']

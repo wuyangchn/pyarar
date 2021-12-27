@@ -19,11 +19,16 @@ print(b.Ar40MList)
 print(b.JValue)
 b.save()
 print(b.SampleID)
+print(b.Ar39TempList)
 
-print(b.Ar36TempList)
 pyarar.maincalc.corrBlank(b)
+print(b.Ar39TempList)
 
-print(b.Ar36TempList)
+pyarar.maincalc.corrDiscr(b)
+print(b.Ar39TempList)
+
+pyarar.maincalc.corrDecay(b)
+print(b.Ar39TempList)
 
 res = []
 with open('save\\' + str(b.SampleName) + '.sp', 'rb') as f:
