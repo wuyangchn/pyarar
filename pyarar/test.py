@@ -42,6 +42,9 @@ print(b.Ar36DegasAirError)
 
 print(b.Ar37DegasCaError)
 
+print(b.IrradiationEndTimeList)
+print(b.IrradiationDurationList)
+
 res = []
 with open('save\\' + str(b.SampleName) + '.sp', 'rb') as f:
     try:
