@@ -19,16 +19,28 @@ print(b.Ar40MList)
 print(b.JValue)
 b.save()
 print(b.SampleID)
-print(b.Ar39TempList)
-
 pyarar.maincalc.corrBlank(b)
-print(b.Ar39TempList)
-
 pyarar.maincalc.corrDiscr(b)
-print(b.Ar39TempList)
-
 pyarar.maincalc.corrDecay(b)
-print(b.Ar39TempList)
+pyarar.maincalc.degasPattern(b)
+print(b.Ar40TempList)
+print(b.Ar40DegasCa)
+print(b.Ar40DegasK)
+print(b.Ar40DegasCl)
+print(b.Ar40DegasAir)
+print(b.Ar40DegasR)
+
+print([b.Ar40DegasRError[i] / b.Ar40DegasR[i] * 100 if b.Ar40DegasR[i] != 0 else b.Ar40DegasRError[i]
+       for i in range(len(b.Ar40DegasR))])
+print([b.Ar37DegasCaError[i] / b.Ar37DegasCa[i] * 100 if b.Ar37DegasCa[i] != 0 else b.Ar37DegasCaError[i]
+       for i in range(len(b.Ar37DegasCa))])
+print([b.Ar39DegasKError[i] / b.Ar39DegasK[i] * 100 if b.Ar39DegasK[i] != 0 else b.Ar39DegasKError[i]
+       for i in range(len(b.Ar39DegasK))])
+
+print(b.Ar36DegasClError)
+print(b.Ar36DegasAirError)
+
+print(b.Ar37DegasCaError)
 
 res = []
 with open('save\\' + str(b.SampleName) + '.sp', 'rb') as f:

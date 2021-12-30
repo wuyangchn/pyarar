@@ -88,49 +88,49 @@ class Sample:
         self.Ar39TempErrorList: list = kwargs.pop("Ar39TempErrorList", [])
         self.Ar40TempErrorList: list = kwargs.pop("Ar40TempErrorList", [])
 
-        self.Ar36DegassCa: list = kwargs.pop("Ar36DegassCa", [])
-        self.Ar36DegassK: list = kwargs.pop("Ar36DegassK", [])
-        self.Ar36DegassCl: list = kwargs.pop("Ar36DegassCl", [])
-        self.Ar36DegassAir: list = kwargs.pop("Ar36DegassAir", [])
-        self.Ar37DegassCa: list = kwargs.pop("Ar37DegassCa", [])
-        self.Ar37DegassK: list = kwargs.pop("Ar37DegassK", [])
-        self.Ar37DegassCl: list = kwargs.pop("Ar37DegassCl", [])
-        self.Ar37DegassAir: list = kwargs.pop("Ar37DegassAir", [])
-        self.Ar38DegassCa: list = kwargs.pop("Ar38DegassCa", [])
-        self.Ar38DegassK: list = kwargs.pop("Ar38DegassK", [])
-        self.Ar38DegassCl: list = kwargs.pop("Ar38DegassCl", [])
-        self.Ar38DegassAir: list = kwargs.pop("Ar38DegassAir", [])
-        self.Ar39DegassCa: list = kwargs.pop("Ar39DegassCa", [])
-        self.Ar39DegassK: list = kwargs.pop("Ar39DegassK", [])
-        self.Ar39DegassCl: list = kwargs.pop("Ar39DegassCl", [])
-        self.Ar39DegassAir: list = kwargs.pop("Ar39DegassAir", [])
-        self.Ar40DegassCa: list = kwargs.pop("Ar40DegassCa", [])
-        self.Ar40DegassK: list = kwargs.pop("Ar40DegassK", [])
-        self.Ar40DegassCl: list = kwargs.pop("Ar40DegassCl", [])
-        self.Ar40DegassAir: list = kwargs.pop("Ar40DegassAir", [])
-        self.Ar40DegassR: list = kwargs.pop("Ar40DegassR", [])
+        self.Ar36DegasCa: list = kwargs.pop("Ar36DegasCa", [])
+        self.Ar36DegasK: list = kwargs.pop("Ar36DegasK", [])
+        self.Ar36DegasCl: list = kwargs.pop("Ar36DegasCl", [])
+        self.Ar36DegasAir: list = kwargs.pop("Ar36DegasAir", [])
+        self.Ar37DegasCa: list = kwargs.pop("Ar37DegasCa", [])
+        self.Ar37DegasK: list = kwargs.pop("Ar37DegasK", [])
+        self.Ar37DegasCl: list = kwargs.pop("Ar37DegasCl", [])
+        self.Ar37DegasAir: list = kwargs.pop("Ar37DegasAir", [])
+        self.Ar38DegasCa: list = kwargs.pop("Ar38DegasCa", [])
+        self.Ar38DegasK: list = kwargs.pop("Ar38DegasK", [])
+        self.Ar38DegasCl: list = kwargs.pop("Ar38DegasCl", [])
+        self.Ar38DegasAir: list = kwargs.pop("Ar38DegasAir", [])
+        self.Ar39DegasCa: list = kwargs.pop("Ar39DegasCa", [])
+        self.Ar39DegasK: list = kwargs.pop("Ar39DegasK", [])
+        self.Ar39DegasCl: list = kwargs.pop("Ar39DegasCl", [])
+        self.Ar39DegasAir: list = kwargs.pop("Ar39DegasAir", [])
+        self.Ar40DegasCa: list = kwargs.pop("Ar40DegasCa", [])
+        self.Ar40DegasK: list = kwargs.pop("Ar40DegasK", [])
+        self.Ar40DegasCl: list = kwargs.pop("Ar40DegasCl", [])
+        self.Ar40DegasAir: list = kwargs.pop("Ar40DegasAir", [])
+        self.Ar40DegasR: list = kwargs.pop("Ar40DegasR", [])
 
-        self.Ar36DegassCaError: list = kwargs.pop("Ar36DegassCaError", [])
-        self.Ar36DegassKError: list = kwargs.pop("Ar36DegassKError", [])
-        self.Ar36DegassClError: list = kwargs.pop("Ar36DegassClError", [])
-        self.Ar36DegassAirError: list = kwargs.pop("Ar36DegassAirError", [])
-        self.Ar37DegassCaError: list = kwargs.pop("Ar37DegassCaError", [])
-        self.Ar37DegassKError: list = kwargs.pop("Ar37DegassKError", [])
-        self.Ar37DegassClError: list = kwargs.pop("Ar37DegassClError", [])
-        self.Ar37DegassAirError: list = kwargs.pop("Ar37DegassAirError", [])
-        self.Ar38DegassCaError: list = kwargs.pop("Ar38DegassCaError", [])
-        self.Ar38DegassKError: list = kwargs.pop("Ar38DegassKError", [])
-        self.Ar38DegassClError: list = kwargs.pop("Ar38DegassClError", [])
-        self.Ar38DegassAirError: list = kwargs.pop("Ar38DegassAirError", [])
-        self.Ar39DegassCaError: list = kwargs.pop("Ar39DegassCaError", [])
-        self.Ar39DegassKError: list = kwargs.pop("Ar39DegassKError", [])
-        self.Ar39DegassClError: list = kwargs.pop("Ar39DegassClError", [])
-        self.Ar39DegassAirError: list = kwargs.pop("Ar39DegassAirError", [])
-        self.Ar40DegassCaError: list = kwargs.pop("Ar40DegassCaError", [])
-        self.Ar40DegassKError: list = kwargs.pop("Ar40DegassKError", [])
-        self.Ar40DegassClError: list = kwargs.pop("Ar40DegassClError", [])
-        self.Ar40DegassAirError: list = kwargs.pop("Ar40DegassAirError", [])
-        self.Ar40DegassRError: list = kwargs.pop("Ar40DegassRError", [])
+        self.Ar36DegasCaError: list = kwargs.pop("Ar36DegasCaError", [])
+        self.Ar36DegasKError: list = kwargs.pop("Ar36DegasKError", [])
+        self.Ar36DegasClError: list = kwargs.pop("Ar36DegasClError", [])
+        self.Ar36DegasAirError: list = kwargs.pop("Ar36DegasAirError", [])
+        self.Ar37DegasCaError: list = kwargs.pop("Ar37DegasCaError", [])
+        self.Ar37DegasKError: list = kwargs.pop("Ar37DegasKError", [])
+        self.Ar37DegasClError: list = kwargs.pop("Ar37DegasClError", [])
+        self.Ar37DegasAirError: list = kwargs.pop("Ar37DegasAirError", [])
+        self.Ar38DegasCaError: list = kwargs.pop("Ar38DegasCaError", [])
+        self.Ar38DegasKError: list = kwargs.pop("Ar38DegasKError", [])
+        self.Ar38DegasClError: list = kwargs.pop("Ar38DegasClError", [])
+        self.Ar38DegasAirError: list = kwargs.pop("Ar38DegasAirError", [])
+        self.Ar39DegasCaError: list = kwargs.pop("Ar39DegasCaError", [])
+        self.Ar39DegasKError: list = kwargs.pop("Ar39DegasKError", [])
+        self.Ar39DegasClError: list = kwargs.pop("Ar39DegasClError", [])
+        self.Ar39DegasAirError: list = kwargs.pop("Ar39DegasAirError", [])
+        self.Ar40DegasCaError: list = kwargs.pop("Ar40DegasCaError", [])
+        self.Ar40DegasKError: list = kwargs.pop("Ar40DegasKError", [])
+        self.Ar40DegasClError: list = kwargs.pop("Ar40DegasClError", [])
+        self.Ar40DegasAirError: list = kwargs.pop("Ar40DegasAirError", [])
+        self.Ar40DegasRError: list = kwargs.pop("Ar40DegasRError", [])
 
         self.RawFilePath: str = kwargs.pop("RawFilePath", "")
         self.FilteredFilePath: str = kwargs.pop("FilteredFilePath", "")
@@ -157,7 +157,7 @@ class Sample:
         self.Ar40Mass: float = kwargs.pop("Ar40Mass", Ar40Mass)
         self.Ar40MassError: float = kwargs.pop("Ar40MassError", Ar40MassError)
 
-        self.K40Const: float = kwargs.pop("K40Const", K40Const)
+        self.K40Const: float = kwargs.pop("K40Const", K40Const)  # unit: /a
         self.K40ConstError: float = kwargs.pop("K40ConstError", K40ConstError)
         self.K40ECConstError: float = kwargs.pop("K40ECConstError", K40ECConstError)
         self.K40ECConst: float = kwargs.pop("K40ECConst", K40ECConst)
@@ -165,11 +165,11 @@ class Sample:
         self.K40BetaNConstError: float = kwargs.pop("K40BetaNConstError", K40BetaNConstError)
         self.K40BetaPConst: float = kwargs.pop("K40BetaPConst", K40BetaPConst)
         self.K40BetaPConstError: float = kwargs.pop("K40BetaPConstError", K40BetaPConstError)
-        self.Ar39Const: float = kwargs.pop("Ar39Const", Ar39Const)
+        self.Ar39Const: float = kwargs.pop("Ar39Const", Ar39Const)  # unit: /h
         self.Ar39ConstError: float = kwargs.pop("Ar39ConstError", Ar39ConstError)
-        self.Ar37Const: float = kwargs.pop("Ar37Const", Ar37Const)
+        self.Ar37Const: float = kwargs.pop("Ar37Const", Ar37Const)  # unit: /h
         self.Ar37ConstError: float = kwargs.pop("Ar37ConstError", Ar37ConstError)
-        self.Cl36Const: float = kwargs.pop("Cl36Const", Cl36Const)
+        self.Cl36Const: float = kwargs.pop("Cl36Const", Cl36Const)  # unit: /a
         self.Cl36ConstError: float = kwargs.pop("Cl36ConstError", Cl36ConstError)
         self.K40ECActivity: float = kwargs.pop("K40ECActivity", K40ECActivity)
         self.K40ECActivityError: float = kwargs.pop("K40ECActivityError", K40ECActivityError)
@@ -177,8 +177,8 @@ class Sample:
         self.K40BetaNActivityError: float = kwargs.pop("K40BetaNActivityError", K40BetaNActivityError)
         self.K40BetaPActivity: float = kwargs.pop("K40BetaPActivity", K40BetaPActivity)
         self.K40BetaPActivityError: float = kwargs.pop("K40BetaPActivityError", K40BetaPActivityError)
-        self.Cl36vs38Activity: float = kwargs.pop("Cl36vs38Activity", Cl36vs38Activity)
-        self.Cl36vs38ActivityError: float = kwargs.pop("Cl36vs38ActivityError", Cl36vs38ActivityError)
+        self.Cl36vs38Productivity: float = kwargs.pop("Cl36vs38Productivity", Cl36vs38Productivity)
+        self.Cl36vs38ProductivityError: float = kwargs.pop("Cl36vs38ProductivityError", Cl36vs38ProductivityError)
         self.NoConst: float = kwargs.pop("NoConst", NoConst)
         self.NoConstError: float = kwargs.pop("NoConstError", NoConstError)
         self.yearConst: float = kwargs.pop("yearConst", yearConst)
@@ -204,6 +204,7 @@ class Sample:
         self.CorrDiscr: bool = kwargs.pop("CorrDiscr", CorrDiscr)
         self.CorrK: bool = kwargs.pop("CorrK", CorrK)
         self.CorrCa: bool = kwargs.pop("CorrCa", CorrCa)
+        self.CorrCl: bool = kwargs.pop("CorrCl", CorrCl)
         self.CorrAtm: bool = kwargs.pop("CorrAtm", CorrAtm)
         self.RelativeError: bool = kwargs.pop("RelativeError", RelativeError)
         self.UseDecayConst: bool = kwargs.pop("UseDecayConst", UseDecayConst)
@@ -368,8 +369,8 @@ class Sample:
             self.K40vsKFractionsError = float(logs01_params[1][15])
             self.Cl35vsCl37Fractions = float(logs01_params[1][16])
             self.Cl35vsCl37FractionsError = float(logs01_params[1][17])
-            self.Cl36vs38Activity = float(logs01_params[1][18])
-            self.Cl36vs38ActivityError = float(logs01_params[1][19])
+            self.Cl36vs38Productivity = float(logs01_params[1][18])
+            self.Cl36vs38ProductivityError = float(logs01_params[1][19])
             self.HClvsClFractions = float(logs01_params[1][24])
             self.HClvsClFractionsError = float(logs01_params[1][25])
             self.K40ECActivity = float(logs01_params[1][26])
@@ -422,17 +423,17 @@ class Sample:
                      self.Ar36BList, self.Ar37BList, self.Ar38BList, self.Ar39BList, self.Ar40BList,
                      self.Ar36BErrorList, self.Ar37BErrorList, self.Ar38BErrorList, self.Ar39BErrorList,
                      self.Ar40BErrorList,
-                     self.Ar36DegassCa, self.Ar36DegassK, self.Ar36DegassCl, self.Ar36DegassAir,
-                     self.Ar37DegassCa, self.Ar37DegassK, self.Ar37DegassCl, self.Ar37DegassAir,
-                     self.Ar38DegassCa, self.Ar38DegassK, self.Ar38DegassCl, self.Ar38DegassAir,
-                     self.Ar39DegassCa, self.Ar39DegassK, self.Ar39DegassCl, self.Ar39DegassAir,
-                     self.Ar40DegassCa, self.Ar40DegassK, self.Ar40DegassCl, self.Ar40DegassAir,
-                     self.Ar40DegassR,
-                     self.Ar36DegassCaError, self.Ar36DegassKError, self.Ar36DegassClError, self.Ar36DegassAirError,
-                     self.Ar37DegassCaError, self.Ar37DegassKError, self.Ar37DegassClError, self.Ar37DegassAirError,
-                     self.Ar38DegassCaError, self.Ar38DegassKError, self.Ar38DegassClError, self.Ar38DegassAirError,
-                     self.Ar39DegassCaError, self.Ar39DegassKError, self.Ar39DegassClError, self.Ar39DegassAirError,
-                     self.Ar40DegassCaError, self.Ar40DegassKError, self.Ar40DegassClError, self.Ar40DegassAirError,
-                     self.Ar40DegassRError]
+                     self.Ar36DegasCa, self.Ar36DegasK, self.Ar36DegasCl, self.Ar36DegasAir,
+                     self.Ar37DegasCa, self.Ar37DegasK, self.Ar37DegasCl, self.Ar37DegasAir,
+                     self.Ar38DegasCa, self.Ar38DegasK, self.Ar38DegasCl, self.Ar38DegasAir,
+                     self.Ar39DegasCa, self.Ar39DegasK, self.Ar39DegasCl, self.Ar39DegasAir,
+                     self.Ar40DegasCa, self.Ar40DegasK, self.Ar40DegasCl, self.Ar40DegasAir,
+                     self.Ar40DegasR,
+                     self.Ar36DegasCaError, self.Ar36DegasKError, self.Ar36DegasClError, self.Ar36DegasAirError,
+                     self.Ar37DegasCaError, self.Ar37DegasKError, self.Ar37DegasClError, self.Ar37DegasAirError,
+                     self.Ar38DegasCaError, self.Ar38DegasKError, self.Ar38DegasClError, self.Ar38DegasAirError,
+                     self.Ar39DegasCaError, self.Ar39DegasKError, self.Ar39DegasClError, self.Ar39DegasAirError,
+                     self.Ar40DegasCaError, self.Ar40DegasKError, self.Ar40DegasClError, self.Ar40DegasAirError,
+                     self.Ar40DegasRError]
         for each_list in _dataList:
             each_list.clear()

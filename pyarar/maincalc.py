@@ -7,6 +7,7 @@
 
 from pyarar import calcFuncs as ProFunctions
 from pyarar import sample
+from math import exp
 
 def corrBlank(sp: sample.Sample):
     if sp.CorrBlank:
@@ -58,31 +59,141 @@ def corrDecay(sp: sample.Sample):
             sp.Ar39TempList[row], sp.Ar39TempErrorList[row] \
                 = _func(sp.Ar39TempList[row], sp.Ar39TempErrorList[row], c)
 
+def degasPattern(sp: sample.Sample):
+    def _mul(a0, e0, f, rsf, state: bool):
+        k1 = [ProFunctions.error_mul((a0[i], e0[i]), (f, rsf * f / 100)) if state else 0 for i in range(len(a0))]
+        k0 = [a0[i] * f if state else 0 for i in range(len(a0))]
+        return k0, k1
+
+    def _sub(a0, e0, a1, e1, state: bool):
+        k1 = [ProFunctions.error_add(e0[i], e1[i]) if state else 0 for i in range(len(a0))]
+        k0 = [a0[i] - a1[i] if state else 0 for i in range(len(a0))]
+        return k0, k1
+
+    def _second(datetime: list, endtime: list):
+        t_day, t_month, t_year, t_hour, t_min = datetime
+        return [(ProFunctions.get_datetime(t_year, t_month, t_day, t_hour, t_min) - i) / (3600 * 24 * 365.242) for i in
+                endtime]
+    # Corr Ca
+    sp.Ar37DegasCa, sp.Ar37DegasCaError = _mul(sp.Ar37TempList, sp.Ar37TempErrorList, 1, 0, sp.CorrCa)
+    # Force negative values to zero
+    sp.Ar37DegasCa = [0 if i < 0 and sp.ForceNegative else i for i in sp.Ar37DegasCa]
+    sp.Ar36DegasCa, sp.Ar36DegasCaError \
+        = _mul(sp.Ar37DegasCa, sp.Ar37DegasCaError, sp.Ar36vsAr37Ca, sp.Ar36vsAr37CaError, sp.CorrCa)
+    sp.Ar38DegasCa, sp.Ar38DegasCaError \
+        = _mul(sp.Ar37DegasCa, sp.Ar37DegasCaError, sp.Ar38vsAr37Ca, sp.Ar38vsAr37CaError, sp.CorrCa)
+    sp.Ar39DegasCa, sp.Ar39DegasCaError \
+        = _mul(sp.Ar37DegasCa, sp.Ar37DegasCaError, sp.Ar39vsAr37Ca, sp.Ar39vsAr37CaError, sp.CorrCa)
+    sp.Ar40DegasCa, sp.Ar40DegasCaError = _mul(sp.Ar37DegasCa, sp.Ar37DegasCaError, 0, 0, False)
+    # Corr K
+    sp.Ar39DegasK, sp.Ar39DegasKError\
+        = _sub(sp.Ar39TempList, sp.Ar39TempErrorList, sp.Ar39DegasCa, sp.Ar39DegasCaError, sp.CorrK)
+    # Force negative values to zero
+    sp.Ar39DegasK = [0 if i < 0 and sp.ForceNegative else i for i in sp.Ar39DegasK]
+    sp.Ar40DegasK, sp.Ar40DegasKError\
+        = _mul(sp.Ar39DegasK, sp.Ar39DegasKError, sp.Ar40vsAr39K, sp.Ar40vsAr39KError, sp.CorrK)
+    sp.Ar38DegasK, sp.Ar38DegasKError\
+        = _mul(sp.Ar39DegasK, sp.Ar39DegasKError, sp.Ar38vsAr39K, sp.Ar38vsAr39KError, sp.CorrK)
+    sp.Ar36DegasK, sp.Ar36DegasKError = _mul(sp.Ar39DegasK, sp.Ar39DegasKError, 0, 0, False)
+    sp.Ar37DegasK, sp.Ar37DegasKError = _mul(sp.Ar39DegasK, sp.Ar39DegasKError, 0, 0, False)
+    # Corr Cl
+    try:
+        if not sp.CorrCl:
+            raise ValueError('Do not Correct Cl')
+        stand_time_year = [_second(datetime, sp.IrradiationEndTimeList)[-1] for datetime in sp.MDateTimeList]
+        # 36Ar deduct Ca, that is sum of 36Ara and 36ArCl
+        v36acl = [sp.Ar36TempList[i] - sp.Ar36DegasCa[i] for i in range(len(sp.Ar36TempList))]
+        sv36acl = [ProFunctions.error_add(sp.Ar36TempErrorList[i], sp.Ar36DegasCaError[i]) for i in
+                   range(len(sp.Ar36TempErrorList))]
+        # 38Ar deduct K and Ca, that is sum of 38Ara and 38ArCl
+        v38acl = [sp.Ar38TempList[i] - sp.Ar38DegasK[i] - sp.Ar38DegasCa[i] for i in range(len(sp.Ar38TempList))]
+        sv38acl = [ProFunctions.error_add(sp.Ar38TempErrorList[i], sp.Ar38DegasKError[i], sp.Ar38DegasCaError[i])
+                   for i in range(len(v38acl))]
+        v3 = [sp.Cl36vs38Productivity * (1 - exp(-1 * sp.Cl36Const * stand_time_year[i])) for i in
+              range(len(stand_time_year))]
+        s3 = [pow((sp.Cl36vs38Productivity * sp.Cl36vs38ProductivityError / 100 *
+                   (1 - exp(-1 * sp.Cl36Const * stand_time_year[i]))) ** 2 +
+                  (sp.Cl36vs38Productivity * stand_time_year[i] * (exp(-1 * sp.Cl36Const * stand_time_year[i])) *
+                   sp.Cl36Const * sp.Cl36ConstError / 100) ** 2, 0.5) for i in range(len(stand_time_year))]
+        s3 = [ProFunctions.error_div((1, 0), (v3[i], s3[i])) for i in range(len(s3))]
+        v3 = [1 / v3[i] for i in range(len(v3))]
+        # 36ArCl
+        sp.Ar36DegasCl = [(v36acl[i] * sp.Ar38vsAr36Trapped - v38acl[i]) / (sp.Ar38vsAr36Trapped - v3[i]) for i in range(len(v36acl))]
+        s1 = [(sv36acl[i] * sp.Ar38vsAr36Trapped / (sp.Ar38vsAr36Trapped - v3[i])) ** 2 for i in range(len(sp.Ar36DegasCl))]
+        s2 = [(sv38acl[i] / (sp.Ar38vsAr36Trapped - v3[i])) ** 2 for i in range(len(sp.Ar36DegasCl))]
+        s3 = [(s3[i] * (v36acl[i] * sp.Ar38vsAr36Trapped - v38acl[i]) / (sp.Ar38vsAr36Trapped - v3[i]) ** 2) ** 2 for i in range(len(sp.Ar36DegasCl))]
+        s4 = [(v36acl[i] / (sp.Ar38vsAr36Trapped - v3[i]) - (v36acl[i] * sp.Ar38vsAr36Trapped - v38acl[i]) / (sp.Ar38vsAr36Trapped - v3[i]) ** 2) ** 2 * (
+                sp.Ar38vsAr36TrappedError * sp.Ar38vsAr36Trapped / 100) ** 2 for i in range(len(sp.Ar36DegasCl))]
+        sp.Ar36DegasClError = [pow(s1[i] + s2[i] + s3[i] + s4[i], 0.5) for i in range(len(sp.Ar36DegasCl))]
+        # Force negative values to zero
+        sp.Ar36DegasCl = [0 if i < 0 and sp.ForceNegative else i for i in sp.Ar36DegasCl]
+        '''
+        # force 36ArCl to zero if 36Ar - 36ArCa - 36Cl < 0
+        sp.Ar36DegasClError = [sp.Ar36DegasClError[i] if v36acl[i] - sp.Ar36DegasCl[i] >= 0 else 0 for i in range(len(sp.Ar36DegasClError))]
+        sp.Ar36DegasCl = [sp.Ar36DegasCl[i] if v36acl[i] - sp.Ar36DegasCl[i] >= 0 else 0 for i in range(len(sp.Ar36DegasCl))]
+        '''
+        # 38ArCl
+        sp.Ar38DegasClError = [ProFunctions.error_mul((sp.Ar36DegasCl[i], sp.Ar36DegasClError[i]), (v3[i], s3[i]))
+                               for i in range(len(sp.Ar36DegasCl))]
+        sp.Ar38DegasCl = [sp.Ar36DegasCl[i] * v3[i] for i in range(len(sp.Ar36DegasCl))]
+        sp.Ar37DegasCl, sp.Ar37DegasClError = [0] * len(sp.Ar36DegasCl), [0] * len(sp.Ar36DegasCl)
+        sp.Ar39DegasCl, sp.Ar39DegasClError = [0] * len(sp.Ar36DegasCl), [0] * len(sp.Ar36DegasCl)
+        sp.Ar40DegasCl, sp.Ar40DegasClError = [0] * len(sp.Ar36DegasCl), [0] * len(sp.Ar36DegasCl)
+    except Exception as e:
+        print('Error in corr Cl: %s' % str(e))
+
+    # Corr Atm
+    try:
+        if not sp.CorrAtm:
+            raise ValueError('Do not Correct Cl')
+
+        # 36ArAir
+        sp.Ar36DegasAir = [sp.Ar36TempList[i] - sp.Ar36DegasCa[i] - sp.Ar36DegasCl[i] - sp.Ar36DegasK[i] for i in
+                           range(len(sp.Ar36TempList))]
+        sp.Ar36DegasAirError = [
+            ProFunctions.error_add(sp.Ar36TempErrorList[i], sp.Ar36DegasCaError[i], sp.Ar36DegasClError[i],
+                                   sp.Ar36DegasKError[i])for i in range(len(sp.Ar36DegasCl))]
+        # Force negative values to zero
+        sp.Ar36DegasAir = [0 if i < 0 and sp.ForceNegative else i for i in sp.Ar36DegasAir]
+
+        # 38ArAir
+        sp.Ar38DegasAir = [sp.Ar36DegasAir[i] * sp.Ar38vsAr36Trapped for i in range(len(sp.Ar36DegasAir))]
+        sp.Ar38DegasAirError = [
+            ProFunctions.error_mul((sp.Ar36DegasAir[i], sp.Ar36DegasAirError[i]),
+                                   (sp.Ar38vsAr36Trapped, sp.Ar38vsAr36TrappedError)) for i in
+            range(len(sp.Ar36DegasAir))]
+
+        # 40ArAir
+        sp.Ar40DegasAir = [sp.Ar36DegasAir[i] * sp.Ar40vsAr36Trapped for i in range(len(sp.Ar36DegasAir))]
+        sp.Ar40DegasAirError = [
+            ProFunctions.error_mul((sp.Ar36DegasAir[i], sp.Ar36DegasAirError[i]),
+                                   (sp.Ar40vsAr36Trapped, sp.Ar40vsAr36TrappedError)) for i in
+            range(len(sp.Ar36DegasAir))]
+
+        sp.Ar37DegasAir, sp.Ar37DegasAirError = [0] * len(sp.Ar36DegasAir), [0] * len(sp.Ar36DegasAir)
+        sp.Ar39DegasAir, sp.Ar39DegasAirError = [0] * len(sp.Ar36DegasAir), [0] * len(sp.Ar36DegasAir)
+    except Exception as e:
+        print('Error in corr Air: %s' % str(e))
+
+    # 40Ar deduct K, that is sum of 40Ara and 40Arr
+    sp.Ar40DegasR = [sp.Ar40TempList[i] - sp.Ar40DegasCa[i] - sp.Ar40DegasCl[i] - sp.Ar40DegasK[i] - sp.Ar40DegasAir[i]
+                     for i in range(len(sp.Ar40TempList))]
+    sp.Ar40DegasRError = [
+        ProFunctions.error_add(sp.Ar40TempErrorList[i], sp.Ar40DegasCaError[i], sp.Ar40DegasClError[i],
+                               sp.Ar40DegasKError[i], sp.Ar40DegasAirError[i]) for i in range(len(sp.Ar40TempList))]
+    # Force negative values to zero
+    sp.Ar40DegasR = [0 if i < 0 and sp.ForceNegative else i for i in sp.Ar40DegasR]
+
 def correctFunc(self, all_param):
     # 初始化
     print('运行CorrectFunc')
-    result = [];
-    Cl36_partial = [[], []]
+    result = []
     for i in range(12):
         result.append([])
-    # result列表的顺序：
-    # 编号、温度、36Ar、s、37Ar、s、38Ar、s、39Ar、s、40Ar、s、
-    MDF = float(all_param['Calculation']['MDF'])
-    sMDF = float(all_param['Calculation']['sMDF'])  # sMDF为以百分数表示的相对误差
     k37 = (float(all_param['Calculation']['37ArConst']), float(all_param['Calculation']['37ArConstError']))  # Ar37衰变常数
-    k39 = (float(all_param['Calculation']['39ArConst']), float(all_param['Calculation']['39ArConstError']))  # Ar39衰变常数
-    k36 = (float(all_param['Calculation']['39ArConst']), float(all_param['Calculation']['39ArConstError']))  # Cl36衰变常数
-    CorrBlank = bool(all_param['Calculation']['CorrBlank'])
-    CorrDiscr = bool(all_param['Calculation']['CorrDiscr'])
+    k39 = (float(all_param['Calculation']['39ArConst']), float(all_param['Calculation']['39ArConstError']))
     Corr37Decay = bool(all_param['Calculation']['Corr37ArDecay'])
     Corr39Decay = bool(all_param['Calculation']['Corr39ArDecay'])
-    M40 = float(all_param['Calculation']['40ArMass'])  # M40 = 39.962383123
-    M39 = float(all_param['Calculation']['39ArMass'])  # M39 = 38.964313
-    M38 = float(all_param['Calculation']['38ArMass'])  # M38 = 37.9627322
-    M37 = float(all_param['Calculation']['37ArMass'])  # M37 = 36.9667759
-    M36 = float(all_param['Calculation']['36ArMass'])  # M36 = 35.96754628
-    # M41 = 40.9645008
-    # M35 = 34.9752567
 
     t1 = []  # 同位素测试时间
     t3_1 = all_param['Irradiation']['duration']  # 辐照持续时间，irradiation子窗口中设置,单位为小时
@@ -103,38 +214,6 @@ def correctFunc(self, all_param):
         pass
     initial = self.read_intercept_and_blank_data()
     result[0:2] = initial[0][0:2]
-    # 校正本底
-    print('本底校正')
-    # Blank correction, Ar36 | Ar37 | Ar38 | Ar39 | Ar40
-    if CorrBlank:
-        result[2], result[3] = ProFunctions.corr_blank(initial[0][2], initial[0][3], initial[1][3], initial[1][4])
-        result[4], result[5] = ProFunctions.corr_blank(initial[0][5], initial[0][6], initial[1][5], initial[1][6])
-        result[6], result[7] = ProFunctions.corr_blank(initial[0][8], initial[0][9], initial[1][7], initial[1][8])
-        result[8], result[9] = ProFunctions.corr_blank(initial[0][11], initial[0][12], initial[1][9],
-                                                       initial[1][10])
-        result[10], result[11] = ProFunctions.corr_blank(initial[0][14], initial[0][15], initial[1][11],
-                                                         initial[1][12])
-    else:
-        result[2], result[3] = initial[0][2], initial[0][3]
-        result[4], result[5] = initial[0][5], initial[0][6]
-        result[6], result[7] = initial[0][8], initial[0][9]
-        result[8], result[9] = initial[0][11], initial[0][12]
-        result[10], result[11] = initial[0][14], initial[0][15]
-    # 基于40Ar的质量歧视
-    print('质量歧视校正')
-    # Mass Discrimination, Ar36 | Ar37 | Ar38 | Ar39
-    c = ProFunctions.corr_discr(MDF, MDF * sMDF / 100, M36, M40) if CorrDiscr else [1, 0]  # 36Ar
-    result[3] = [ProFunctions.error_mul((result[2][i], result[3][i]), (c[0], c[1])) for i in range(len(result[2]))]
-    result[2] = [result[2][i] * c[0] for i in range(len(result[2]))]
-    c = ProFunctions.corr_discr(MDF, MDF * sMDF / 100, M37, M40) if CorrDiscr else [1, 0]  # 37Ar
-    result[5] = [ProFunctions.error_mul((result[4][i], result[5][i]), (c[0], c[1])) for i in range(len(result[4]))]
-    result[4] = [result[4][i] * c[0] for i in range(len(result[4]))]
-    c = ProFunctions.corr_discr(MDF, MDF * sMDF / 100, M38, M40) if CorrDiscr else [1, 0]  # 38Ar
-    result[7] = [ProFunctions.error_mul((result[6][i], result[7][i]), (c[0], c[1])) for i in range(len(result[6]))]
-    result[6] = [result[6][i] * c[0] for i in range(len(result[6]))]
-    c = ProFunctions.corr_discr(MDF, MDF * sMDF / 100, M39, M40) if CorrDiscr else [1, 0]  # 39Ar
-    result[9] = [ProFunctions.error_mul((result[8][i], result[9][i]), (c[0], c[1])) for i in range(len(result[8]))]
-    result[8] = [result[8][i] * c[0] for i in range(len(result[8]))]
     # 37Ar和39Ar的衰变校正
     print('衰变校正')
     # Decay Correction

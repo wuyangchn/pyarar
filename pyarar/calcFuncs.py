@@ -169,7 +169,7 @@ def corr_decay(t1: list, t2: list, t3: list, f: float, rsf: float, unit: str = '
     sf = f * rsf / 100  # change to absolute error
     # t_year, t_month, t_day, t_hour, t_min = t1
     t_day, t_month, t_year, t_hour, t_min = t1
-    t_test_start = get_datatime(t_year, t_month, t_day, t_hour, t_min)  # the time when analysis was starting
+    t_test_start = get_datetime(t_year, t_month, t_day, t_hour, t_min)  # the time when analysis was starting
     k2 = [t_test_start - i for i in t2]  # standing time in second between irradiation and analysing
 
     if unit == 'h':
@@ -196,7 +196,7 @@ def corr_decay(t1: list, t2: list, t3: list, f: float, rsf: float, unit: str = '
     return k0, k1, k2[-1]
 
 
-def get_datatime(t_year: int, t_month: int, t_day: int, t_hour: int, t_min: int, t_seconds: int = 0):
+def get_datetime(t_year: int, t_month: int, t_day: int, t_hour: int, t_min: int, t_seconds: int = 0):
     """
     :param t_year: int
     :param t_month: int
@@ -1131,7 +1131,7 @@ def open_age_xls(filepath: str):
             _day = each_date.split(' ')[1].split('/')[0]
             _hour = each_date.split(' ')[2].split('.')[0]
             _min = each_date.split(' ')[2].split('.')[1]
-            end_time_second.append(get_datatime(t_year=int(_year), t_month=int(_month), t_day=int(_day),
+            end_time_second.append(get_datetime(t_year=int(_year), t_month=int(_month), t_day=int(_day),
                                                 t_hour=int(_hour), t_min=int(_min)))
             each_duration_hour = each_date.split(' ')[0].split('.')[0]
             each_duration_min = each_date.split(' ')[0].split('.')[1]
