@@ -110,6 +110,15 @@ class Sample:
         self.Ar40DegasAir: list = kwargs.pop("Ar40DegasAir", [])
         self.Ar40DegasR: list = kwargs.pop("Ar40DegasR", [])
 
+        self.ClNormalIsochron: list = kwargs.pop("ClNormalIsochron", [])
+        self.ClInverseIsochron: list = kwargs.pop("ClInverseIsochron", [])
+        self.ClKIsochron: list = kwargs.pop("ClKIsochron", [])
+
+        self.AtmNormalIsochron: list = kwargs.pop("AtmNormalIsochron", [])
+        self.AtmInverseIsochron: list = kwargs.pop("AtmInverseIsochron", [])
+
+        self.ThreeDimIsochron: list = kwargs.pop("ThreeDimIsochron", [])
+
         self.Ar36DegasCaError: list = kwargs.pop("Ar36DegasCaError", [])
         self.Ar36DegasKError: list = kwargs.pop("Ar36DegasKError", [])
         self.Ar36DegasClError: list = kwargs.pop("Ar36DegasClError", [])

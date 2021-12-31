@@ -10,6 +10,9 @@ from pyarar import sample
 from math import exp
 
 def corrBlank(sp: sample.Sample):
+    """
+    Blank correction
+    """
     if sp.CorrBlank:
         sp.Ar36TempList, sp.Ar36TempErrorList \
             = ProFunctions.corr_blank(sp.Ar36MList, sp.Ar36MErrorList, sp.Ar36BList, sp.Ar36BErrorList)
@@ -23,6 +26,9 @@ def corrBlank(sp: sample.Sample):
             = ProFunctions.corr_blank(sp.Ar40MList, sp.Ar40MErrorList, sp.Ar40BList, sp.Ar40BErrorList)
 
 def corrDiscr(sp: sample.Sample):
+    """
+    Discrimination correction
+    """
     def _func(a0, e0, f):
         k1 = [ProFunctions.error_mul((a0[i], e0[i]), (f[0], f[1])) for i in range(len(a0))]
         k0 = [a0[i] * f[0] for i in range(len(a0))]
@@ -41,6 +47,9 @@ def corrDiscr(sp: sample.Sample):
         sp.Ar39TempList, sp.Ar39TempErrorList = _func(sp.Ar39TempList, sp.Ar39TempErrorList, c)
 
 def corrDecay(sp: sample.Sample):
+    """
+    Decay correction
+    """
     def _func(a0, e0, f):
         k1 = ProFunctions.error_mul((a0, e0), (f[0], f[1]))
         k0 = a0 * f[0]
@@ -60,6 +69,9 @@ def corrDecay(sp: sample.Sample):
                 = _func(sp.Ar39TempList[row], sp.Ar39TempErrorList[row], c)
 
 def degasPattern(sp: sample.Sample):
+    """
+    Degas Pattern
+    """
     def _mul(a0, e0, f, rsf, state: bool):
         k1 = [ProFunctions.error_mul((a0[i], e0[i]), (f, rsf * f / 100)) if state else 0 for i in range(len(a0))]
         k0 = [a0[i] * f if state else 0 for i in range(len(a0))]
@@ -175,7 +187,7 @@ def degasPattern(sp: sample.Sample):
     except Exception as e:
         print('Error in corr Air: %s' % str(e))
 
-    # 40Ar deduct K, that is sum of 40Ara and 40Arr
+    # 40Arr
     sp.Ar40DegasR = [sp.Ar40TempList[i] - sp.Ar40DegasCa[i] - sp.Ar40DegasCl[i] - sp.Ar40DegasK[i] - sp.Ar40DegasAir[i]
                      for i in range(len(sp.Ar40TempList))]
     sp.Ar40DegasRError = [
@@ -184,54 +196,48 @@ def degasPattern(sp: sample.Sample):
     # Force negative values to zero
     sp.Ar40DegasR = [0 if i < 0 and sp.ForceNegative else i for i in sp.Ar40DegasR]
 
-def correctFunc(self, all_param):
-    # 初始化
-    print('运行CorrectFunc')
-    result = []
-    for i in range(12):
-        result.append([])
-    k37 = (float(all_param['Calculation']['37ArConst']), float(all_param['Calculation']['37ArConstError']))  # Ar37衰变常数
-    k39 = (float(all_param['Calculation']['39ArConst']), float(all_param['Calculation']['39ArConstError']))
-    Corr37Decay = bool(all_param['Calculation']['Corr37ArDecay'])
-    Corr39Decay = bool(all_param['Calculation']['Corr39ArDecay'])
-
-    t1 = []  # 同位素测试时间
-    t3_1 = all_param['Irradiation']['duration']  # 辐照持续时间，irradiation子窗口中设置,单位为小时
-    try:
-        t3_2 = all_param['Irradiation']['duration_list']
-    except KeyError:
-        t3 = [t3_1]
-    else:
-        t3 = t3_2
-        pass
-    t2_1 = all_param['Irradiation']['dateTime']  # 辐照结束时间
-    try:
-        t2_2 = all_param['Irradiation']['dateTime_list']
-    except KeyError:
-        t2 = [t2_1]
-    else:
-        t2 = t2_2
-        pass
-    initial = self.read_intercept_and_blank_data()
-    result[0:2] = initial[0][0:2]
-    # 37Ar和39Ar的衰变校正
-    print('衰变校正')
-    # Decay Correction
-    delta_t = []
-    for row in range(len(initial[0][17])):  # 读取excel文件中的质谱测试时间
-        t1.append([])
-        t1[row].append(int(initial[0][19][row]))
-        t1[row].append(int(initial[0][18][row]))
-        t1[row].append(int(initial[0][17][row]))
-        t1[row].append(int(initial[0][20][row]))
-        t1[row].append(int(initial[0][21][row]))
-        c = ProFunctions.corr_decay(t1[row], t2, t3, k37[0], k37[1])  # 37Ar
-        result[5][row] = ProFunctions.error_mul((result[4][row], result[5][row]), (c[0], c[1])) \
-            if Corr37Decay else result[5][row]
-        result[4][row] = result[4][row] * c[0] if Corr37Decay else result[4][row]
-        c = ProFunctions.corr_decay(t1[row], t2, t3, k39[0], k39[1])  # 39Ar
-        result[9][row] = ProFunctions.error_mul((result[8][row], result[9][row]), (c[0], c[1])) \
-            if Corr39Decay else result[9][row]
-        result[8][row] = result[8][row] * c[0] if Corr39Decay else result[8][row]
-        delta_t.append(c[2])
-    return result, delta_t
+def calcRatios(sp: sample.Sample):
+    """
+    Get ratios using to plot isochron diagrams.
+    """
+    def _getIsochron(x, sx, y, sy, z, sz):
+        _n = min([len(x), len(sx), len(y), len(sy), len(z), len(sz)])
+        # x / z
+        k0 = [x[i] / z[i] if z[i] != 0 else 0 for i in range(_n)]
+        k1 = [ProFunctions.error_div((x[i], sx[i]), (z[i], sz[i])) if z[i] != 0 else 0 for i in range(_n)]
+        # y / z
+        k2 = [y[i] / z[i] if z[i] != 0 else 0 for i in range(_n)]
+        k3 = [ProFunctions.error_div((y[i], sy[i]), (z[i], sz[i])) if z[i] != 0 else 0 for i in range(_n)]
+        k4 = [ProFunctions.error_cor(sx[i] / x[i], sy[i] / y[i], sz[i] / z[i]) if x[i] * y[i] * z[i] != 0 else 0
+              for i in range(_n)]
+        return [k0, k1, k2, k3, k4]
+    # Cl isochron 1: 40Ar* / 38ArCl vs. 39ArK / 38ArCl, 40Ar* = 40ArCl+r
+    sp.ClNormalIsochron = _getIsochron(sp.Ar40DegasR, sp.Ar40DegasRError,
+                                       sp.Ar39DegasK, sp.Ar39DegasKError,
+                                       sp.Ar38DegasCl, sp.Ar38DegasClError)
+    # Cl isochron 2: 38ArCl / 40Ar* vs. 39ArK / 40Ar*
+    sp.ClInverseIsochron = _getIsochron(sp.Ar38DegasCl, sp.Ar38DegasClError,
+                                        sp.Ar39DegasK, sp.Ar39DegasKError,
+                                        sp.Ar40DegasR, sp.Ar40DegasRError)
+    # Cl isochron 3: 40Ar*/39ArK vs. 38ArCl/39ArK
+    sp.ClKIsochron = _getIsochron(sp.Ar40DegasR, sp.Ar40DegasRError,
+                                  sp.Ar38DegasCl, sp.Ar38DegasClError,
+                                  sp.Ar39DegasK, sp.Ar39DegasKError)
+    # normal isochron: 39ArK / 36Ara vs. 40Ar* / 36Ara, 40Ar* = 40Ara+r, however it is actually 40Ara+r+Cl
+    c = [sp.Ar40TempList[i] - sp.Ar40DegasK[i] - sp.Ar40DegasCa[i] - sp.Ar40DegasCl[i]
+         for i in range(len(sp.Ar40TempList))]
+    sc = [ProFunctions.error_add(sp.Ar40TempErrorList[i], sp.Ar40DegasKError[i], sp.Ar40DegasCaError[i],
+                                 sp.Ar40DegasClError[i]) for i in range(len(sp.Ar40TempList))]
+    c = [0 if i < 0 else i for i in c]
+    sp.AtmNormalIsochron = _getIsochron(sp.Ar39DegasK, sp.Ar39DegasKError,
+                                        c, sc,
+                                        sp.Ar36DegasAir, sp.Ar36DegasAirError)
+    # inverse isochron: 39ArK / 40Ar* vs. 36Ara / 40Ar*
+    sp.AtmInverseIsochron = _getIsochron(sp.Ar39DegasK, sp.Ar39DegasKError,
+                                         sp.Ar36DegasAir, sp.Ar36DegasAirError,
+                                         c, sc)
+    # 3D isochron: 39ArK / 40Ar* vs. 36Ara / 40Ar* vs. 38ArCl / 40Ar*, 40Ar* = 40Ara+r+Cl
+    c1 = _getIsochron(sp.Ar38DegasCl, sp.Ar38DegasClError, sp.Ar39DegasK, sp.Ar39DegasKError, c, sc)
+    sp.ThreeDimIsochron = [sp.AtmInverseIsochron[0], sp.AtmInverseIsochron[1],
+                           sp.AtmInverseIsochron[2], sp.AtmInverseIsochron[3],
+                           c1[0], c1[1]]
