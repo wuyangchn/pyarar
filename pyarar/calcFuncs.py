@@ -153,20 +153,19 @@ def corr_discr(mdf: float, smdf: float, m: float, m40: float = M40):
     return k0, k1
 
 
-def corr_decay(t1: list, t2: list, t3: list, f: float, rsf: float, unit: str = 'h'):
+def corr_decay(t1: list, t2: list, t3: list, f: float, sf: float, unit: str = 'h'):
     """
     :param t1: [year, month, day, hour, min], test start time
     :param t2: irradiation end time, in second
     :param t3: irradiation duration time, list for all irradiation cycles, in hour
     :param f: decay constant of K
-    :param rsf: relative error of f
+    :param sf: absolute error of f
     :param unit: unit of decay constant, input 'h' or 'a'
     :return: correction factor | error of factor | stand duration
     """
     v1 = []
     v2 = []
     e1 = []
-    sf = f * rsf / 100  # change to absolute error
     # t_year, t_month, t_day, t_hour, t_min = t1
     t_day, t_month, t_year, t_hour, t_min = t1
     t_test_start = get_datetime(t_year, t_month, t_day, t_hour, t_min)  # the time when analysis was starting
@@ -220,30 +219,28 @@ def get_datetime(t_year: int, t_month: int, t_day: int, t_hour: int, t_min: int,
 '-------------------'
 '--Age Calculation--'
 '-------------------'
-def calc_age(a0: float, e0: float, j: float, rsj: float, f: float, rsf: float, uf: int = 1, useMin2000: bool = False,
-             **kwargs):
+def calc_age(a0: float, e0: float, J: float, sJ: float, L: float, sL: float, uf: int = 1,
+             useMin2000: bool = False, **kwargs):
     """
     :param a0: value of ar40r/ar39k
     :param e0: error of ar40r/ar39k
-    :param j: irradiation params
-    :param rsj: relative error of j in 1 sigma
-    :param f: decay constants of K
-    :param rsf: relative error of f in 1 sigma
+    :param J: irradiation params
+    :param sJ: error of j in 1 sigma
+    :param L: decay constants of K
+    :param sL: error of f in 1 sigma
     :param uf: error factor for ar40r/ar39k error, default = 1
     :param useMin2000: use equation in Min et al., 2000 or conventional equation
     :return: age in Ma | analytical error | internal error | full external error
     """
-    sf = f * rsf / 100  # change to absolute error
-    sj = j * rsj / 100  # change to absolute error
     e0 = e0 / uf  # change to 1 sigma
     try:
-        k0 = log(1 + j * a0) / f
+        k0 = log(1 + J * a0) / L
     except ValueError:
         k0 = 0
     try:
-        v1 = e0 ** 2 * (j / (f * (1 + j * a0))) ** 2
-        v2 = sj ** 2 * (a0 / (f * (1 + j * a0))) ** 2
-        v3 = sf ** 2 * (log(1 + j * a0) / (f ** 2)) ** 2
+        v1 = e0 ** 2 * (J / (L * (1 + J * a0))) ** 2
+        v2 = sJ ** 2 * (a0 / (L * (1 + J * a0))) ** 2
+        v3 = sL ** 2 * (log(1 + J * a0) / (L ** 2)) ** 2
         k1 = pow(v1, 0.5)  # analytical error
         k2 = pow(v1 + v2, 0.5)  # internal error
         k3 = pow(v1 + v2 + v3, 0.5)  # full external error
@@ -256,53 +253,117 @@ def calc_age(a0: float, e0: float, j: float, rsj: float, f: float, rsf: float, u
         kwargs = kwargs.pop('calculationParams', kwargs)
         A = kwargs.pop('activity_of_K', 31.58)
         sA = kwargs.pop('activity_of_K_error', 0.064)
-        W = kwargs.pop('atomic_weight_of_K', 39.0983)
+        Ae = kwargs.pop('activity_of_K_to_Ar', 3.310)  # 40K --> 40Ar
+        sAe = kwargs.pop('activity_of_K_to_Ar_error', 3.310 * 1.209 / 100)
+        Ab = kwargs.pop('activity_of_K_to_Ca', 28.270)  # 40K --> 40Ca
+        sAb = kwargs.pop('activity_of_K_to_Ca_error', 28.270 * 0.177 / 100)
+        W = kwargs.pop('atomic_weight_of_K', 39.09830)
         sW = kwargs.pop('atomic_weight_of_K_error', 39.09830 * 0.000154 / 100)
         Y = kwargs.pop('seconds_in_a_year', 31556930)
         sY = kwargs.pop('seconds_in_a_year_error', 0)
-        p = kwargs.pop('fraction_of_40K', 0.000117)
-        sp = kwargs.pop('fraction_of_40K_error', 0.00000100035)
+        f = kwargs.pop('fraction_of_40K', 0.000117)
+        sf = kwargs.pop('fraction_of_40K_error', 0.00000100035)
         No = kwargs.pop('avogadro_number', 6.0221367E+23)
-        sNo = kwargs.pop('avogadro_number_error', 0.00000355306065)
-        f = kwargs.pop('decay_constant_of_40K', 5.53E-10)
-        sf = kwargs.pop('decay_constant_of_40K_error', 0.048E-10)
+        sNo = kwargs.pop('avogadro_number_error', 6.0221367E+23 * 0.000059 / 100)
+        L = kwargs.pop('decay_constant_of_40K', 5.53E-10)
+        sL = kwargs.pop('decay_constant_of_40K_error', 0.048E-10)
+        Le = kwargs.pop('decay_constant_of_40K_EC', 0.000000000058)
+        sLe = kwargs.pop('decay_constant_of_40K_EC_error', 0.000000000058 * 1.466 / 100)
+        Lb = kwargs.pop('decay_constant_of_40K_betaN', 0.000000000495)
+        sLb = kwargs.pop('decay_constant_of_40K_betaN_error', 0.000000000495 * 0.869 / 100)
         t = kwargs.pop('standard_age', 132.7)
-        st = kwargs.pop('standard_age_error', 132.7 * 0.5 / 100)
-        V = p * No / (A * W * Y)
-        stdR = (exp(t * 1000000 * f) - 1) / j
-        sstdR = pow((stdR / j) ** 2 * sj ** 2, 0.5)
-        R = a0 / stdR
-        sR_1 = error_div((a0, e0), (stdR, sstdR))
-        sR_2 = error_div((a0, e0), (stdR, 0))
-        K = exp(t * 1000000 / V) - 1
-        XX = K * R + 1
-        sXX_1 = error_mul((K, 0), (R, sR_1))
-        sXX_2 = error_mul((K, 0), (R, sR_2))
-        # k0 = V * log(XX), V = p * No / (A * W * Y), XX = K * R + 1
-        e1 = (log(XX) * V / p + V / XX * R * (K + 1) * (t * -1000000 / V ** 2) * V / p) ** 2 * sp ** 2
-        e2 = (log(XX) * V / No + V / XX * R * (K + 1) * (t * -1000000 / V ** 2) * V / No) ** 2 * sNo ** 2
-        e3 = (log(XX) * V / A * -1 + V / XX * R * (K + 1) * (t * -1000000 / V ** 2) * V / A * -1) ** 2 * sA ** 2
-        e4 = (log(XX) * V / W * -1 + V / XX * R * (K + 1) * (t * -1000000 / V ** 2) * V / W * -1) ** 2 * sW ** 2
-        e5 = (log(XX) * V / Y * -1 + V / XX * R * (K + 1) * (t * -1000000 / V ** 2) * V / Y * -1) ** 2 * sY ** 2
-        e6 = (V / XX * K * R / a0) ** 2 * e0 ** 2 if a0 != 0 else 0
-        e7 = (V / XX * K * R / stdR * -1 * exp(t * 1000000 * f) / j * t * 1000000) ** 2 * sf ** 2
-        e8 = (V / XX * K * R / stdR * -1 * stdR / j * -1) ** 2 * sj ** 2
-        e9 = (V / XX * K * R / stdR * -1 * exp(t * 1000000 * f) / j * f * 1000000 +
-              V / XX * R * (K + 1) * 1000000 / V) ** 2 * st ** 2
-        try:
-            k0 = V * log(XX)
-        except ValueError:
-            k0, k1, k2, k3 = 0, 0, 0, 0
+        st = kwargs.pop('standard_age_error', 132.7 * 0.91 / 100)
+        Ap = kwargs.pop('standard_Ar_conc', 1.813)  # p for Primary Standard
+        sAp = kwargs.pop('standard_Ar_conc_error', 1.813 * 0.001 / 100)
+        Kp = kwargs.pop('standard_K_conc', 7.597)
+        sKp = kwargs.pop('standard_K_conc_error', 7.597 * 0.03 / 100)
+        KK = kwargs.pop('standard_40K_K', 0)
+        sKK = kwargs.pop('standard_40K_K_error', 0)
+        UseStandardAge = True
+        UseDecayConstants = False
+        '''age in year'''
+        t = t * 1000000
+        st = st * 1000000
+        '''40Ar/39Ar of flux monitor calculated from J value of unknown sample'''
+        '''errors of standard age and decay constants were not applied'''
+        StdR = (exp(t * L) - 1) / J
+        sStdR = pow((StdR / J) ** 2 * sJ ** 2, 0.5)
+        '''normalize the measured 40Ar/39Ar by back-calculated 40Ar/39Ar of flux monitor'''
+        R = a0 / StdR
+        sR_1 = error_div((a0, e0), (StdR, sStdR))  # errors of measured 40Ar/39Ar and J value
+        sR_2 = error_div((a0, e0), (StdR, 0))  # error of measured 40Ar/39Ar only
+        '''lmd = A * W * Y / (f * No)'''
+        if not UseDecayConstants:
+            V = f * No / (A * W * Y)
+            ForceEqualToCALC = True
+            if ForceEqualToCALC:  # the error of f was not applied in the CALC software
+                sf = 0
+            sV = pow((V / f * sf) ** 2 + (V / No * sNo) ** 2 + (V / A) ** 2 * (sAb ** 2 + sAe ** 2) +
+                     (V / W * sW) ** 2 + (V / Y * sY) ** 2, 0.5)
+            L = 1 / V
+            sL = error_div((1, 0), (V, sV))
+            BB = A / Ae
         else:
-            k1 = pow((V / XX) ** 2 * sXX_2 ** 2, 0.5)  # analytical error
-            k2 = pow((V / XX) ** 2 * sXX_1 ** 2, 0.5)  # internal error
+            V = 1 / L
+            BB = L / Le
+        '''calculate 40Arr/40K of flux monitor using its standard age or known information'''
+        if UseStandardAge:
+            BB = 1
+            KK = exp(t * L) - 1
+            sKK = pow((exp(t * L) * L) ** 2 * st ** 2 + (exp(t * L) * t) ** 2 * sL ** 2, 0.5)
+        else:
+            KK = Ap / (Kp * 0.01 * f / W)  # 40Arr / 40K
+        '''unknown sample'''
+        XX = BB * KK * R + 1
+        '''
+        # k0 = V * log(XX), V = f * No / (A * W * Y), XX = KK * R + 1,
+        # R = a0 / stdR, stdR = (exp(t * 1000000 * lmd) - 1) / j,
+        # KK = exp(t * 1000000 / V) - 1, KK = Ap / (Kp * 0.01 * f / W)
+        # k0 = V * log((exp(t * 1000000 / V) - 1) * a0 * j / (exp(t * 1000000 * lmd) - 1)+ 1)
+        # default: KK = Ap / (Kp * 0.01 * f / W)
+        '''
+        try:
+            e1 = (log(XX) * V / f - V * BB * KK * R / (f * XX)) ** 2 * sf ** 2  # sFr
+            e2 = (log(XX) * V / No) ** 2 * sNo ** 2  # sNo
+            e3 = (-1 * log(XX) * V / A + BB * KK * R / (A * XX)) ** 2 * sAb ** 2  # sAb
+            e4 = (-1 * log(XX) * V / A - Ab * KK * R / (Ae ** 2 * XX)) ** 2 * sAe ** 2  # sAe
+            e5 = (-1 * log(XX) * V / W - V * BB * KK * R / (W * XX)) ** 2 * sW ** 2  # sW
+            e6 = (log(XX) * V / Y) ** 2 * sY ** 2  # sY
+            e7 = (V * BB * KK / XX) ** 2 * sR_1 ** 2  # sR
+            e8 = (V * BB * KK * R / (Ap * XX)) ** 2 * sAp ** 2  # sAp
+            e9 = (V * BB * KK * R / (Kp * XX)) ** 2 * sKp ** 2  # sKp
+            if UseDecayConstants:  # k0 = log(L / Le * KK * R + 1) / L
+                e1 = (V * BB * KK * R / (f * XX)) ** 2 * sf ** 2
+                e2 = 0
+                e3 = (-1 * log(XX) * V / L + BB * KK * R / (L * XX)) ** 2 * sLb ** 2
+                e4 = (-1 * log(XX) * V / L - Lb * KK * R / (Le ** 2 * XX)) ** 2 * sLe ** 2
+                e5 = (V * BB * KK * R / (W * XX)) ** 2 * sW ** 2
+                e6 = 0
+            if UseStandardAge:  # KK = exp(t * L) - 1
+                e1 = 0
+                e8 = (V * BB * R / XX) ** 2 * sKK ** 2  # E5
+                e9 = 0
+                if UseDecayConstants:
+                    e3 = (log(XX) * V / L) ** 2 * sLb ** 2
+                    e4 = (log(XX) * V / L) ** 2 * sLe ** 2
+                    e5 = 0
+                else:
+                    e3 = (log(XX) * V / A) ** 2 * sAb ** 2
+                    e4 = (log(XX) * V / A) ** 2 * sAe ** 2
+                    e5 = (log(XX) * V / W) ** 2 * sW ** 2
+            k0 = V * log(XX)
+            k1 = pow((V * KK * R / (R * XX)) ** 2 * sR_2 ** 2, 0.5)  # analytical error, error of 40Ar/39Ar only
+            k2 = pow((V * KK * R / (R * XX)) ** 2 * sR_1 ** 2, 0.5)  # internal error, errors of 40Ar/39Ar and J value
             '''the calculation of total external error still has a little mistakes'''
             '''there are different method to calculate age by Min 2000, '''
             '''depending on using primary standard or other settings'''
             k3 = pow(e1 + e2 + e3 + e4 + e5 + e6 + e7 + e8 + e9, 0.5)  # total external error
-            # k3 = pow(log(XX) ** 2 * sV ** 2 + k2 ** 2, 0.5)  # total external error
-        [k0, k1, k2, k3] = [i / 1000000 for i in [k0, k1, k2, k3]]  # change to Ma
-
+        except Exception:
+            k0, k1, k2, k3 = 0, 0, 0, 0
+        else:
+            pass
+        finally:
+            [k0, k1, k2, k3] = [i / 1000000 for i in [k0, k1, k2, k3]]  # change to Ma
     return k0, k1, k2, k3
 
 
@@ -339,19 +400,21 @@ def wtd_york2_regression(x: list, sx: list, y: list, sy: list, ri: list, sf: int
     :return: Intercept | Error | slope | Error | MSWD | Convergence | Number of Iterations | error magnification | other
      b, sb, a, sa, mswd, dF, Di, k
     """
-    conv_tol = kwargs.pop('convergence', 0.001)
+    conv_tol = kwargs.pop('convergence', 0.00001)
     iter_num = kwargs.pop('iteration', 100)
     n = len(x)
     sx = [i / sf for i in sx]  # change to 1 sigma
     sy = [i / sf for i in sy]  # change to 1 sigma
     temp_lst = intercept_linest(y, x, external=True)
+    if not temp_lst:
+        return False
     b, seb, m, sem = temp_lst[0], temp_lst[1], temp_lst[5][0], temp_lst[6][0]
     delta_m = abs(m)
     Di = 0
     mswd, k = 1, 1
     X, sX, Y, sY, R = list(x), list(sx), list(y), list(sy), list(ri)
 
-    while delta_m >= abs(m * conv_tol / 100):
+    while delta_m >= abs(m * conv_tol):
         Di = Di + 1
         U = []
         V = []
@@ -413,54 +476,37 @@ def wtd_york2_regression(x: list, sx: list, y: list, sy: list, ri: list, sf: int
     return b, seb, m, sem, mswd, delta_m, Di, k
 
 
-def isochron_age(x: list, sx: list, y: list, sy: list, ri: list, j: float, rsj: float, f: float, rsf: float,
-                 uf: int = 1, isNormal: bool = False, isInverse: bool = False, statistics: bool = False, **kwargs):
+def isochron_regress(x: list, sx: list, y: list, sy: list, ri: list, isNormal: bool = False,
+                     isInverse: bool = False, isKIsochron: bool = False, **kwargs):
     """
     :param x: isochron x-axis
     :param sx: error of x
     :param y: isochron y-axis
     :param sy: error of y
     :param ri: relative coefficient of errors of x and y
-    :param j: J value
-    :param rsj: relative error of J value in 1 sigma
-    :param f: total decay constants of K
-    :param rsf: relative error of f in 1 sigma
-    :param uf: error precision of sx and sy, default = 1 sigma
     :param isNormal: isNormal is True when calculating normal isochron data else False
     :param isInverse: isInverse is True when calculating inverse isochron data else False
-    :param statistics: return all statistic data when True
-    :return: 40Ara/36Ara | error in 1 sigma | 40Arr/39Ark | error in 1 sigma | age | analyse error | internal error |
-             external error | MSWD
-             additional return: b, seb, m, sem, convergence, iterations, error magnification
+    :param isKIsochron: 40Ar* / 39ArK vs. 38ArCl / 39ArK
+    :return: 40Ara/36Ara or 40ArCl/38ArCl | error in 1 sigma | 40Arr/39Ark | error in 1 sigma |
+             MSWD | b | seb | m | sem | convergence | iterations | error magnification
     """
-    conv_tol = kwargs.pop('convergence', 0.001)
+    conv_tol = kwargs.pop('convergence', 0.00001)
     iter_num = kwargs.pop('iteration', 100)
-    if not (isNormal or isInverse) or (isNormal and isInverse):
-        print('isochron type was not assigned')
-        return None
-    sx = [i / uf for i in sx]
-    sy = [i / uf for i in sy]
-    b, seb, m, sem, mswd, conv, Di, errmag = wtd_york2_regression(x, sx, y, sy, ri,
-                                                                  convergence=conv_tol, iteration=iter_num)
+    res = wtd_york2_regression(x, sx, y, sy, ri, convergence=conv_tol, iteration=iter_num)
+    if not res:
+        return False
+    b, seb, m, sem, mswd, conv, Di, errmag = res
     if isNormal:
-        k0 = m
-        k1 = sem
-        k2 = b
-        k3 = seb
-        k4, k5, k6, k7 = calc_age(m, sem, j, rsj, f, rsf)
+        k0, k1, k2, k3 = b, seb, m, sem
     else:
-        k0 = 1 / b
-        k1 = error_div((1, 0), (b, seb))
-        new_b, new_seb, new_m, new_sem, mswd, conv, Di, errmag = wtd_york2_regression(y, sy, x, sx, ri,
-                                                                                      convergence=conv_tol,
-                                                                                      iteration=iter_num)
-        k2 = 1 / new_b
-        k3 = error_div((1, 0), (new_b, new_seb))
-        k4, k5, k6, k7 = calc_age(k2, k3, j, rsj, f, rsf)
-    if statistics:
-        return k0, k1, k2, k3, k4, k5, k6, k7, mswd, b, seb, m, sem, conv, Di, errmag
-    else:
-        return k0, k1, k2, k3, k4, k5, k6, k7, mswd
+        k0, k1 = 1 / b, error_div((1, 0), (b, seb))
+        new_b, new_seb, new_m, new_sem, mswd, conv, Di, errmag = \
+            wtd_york2_regression(y, sy, x, sx, ri, convergence=conv_tol, iteration=iter_num)
+        if isInverse:
+            k2, k3 = 1 / new_b, error_div((1, 0), (new_b, new_seb))
+        else:
+            k2, k3 = new_b, new_seb
+    return k0, k1, k2, k3,  mswd, b, seb, m, sem, conv, Di, errmag
 
 
 def isochron_age_ols(x: list, y: list, j: float, rsj: float, f: float, rsf: float,
@@ -610,7 +656,7 @@ def intercept_linest(a0: list, a1: list, *args, external=False, weight: list = N
     m = len(a1)  # number of data
     n = len(args) + 2  # number of unknown x, constant is seen as x^0
     if len(a0) < 3 or len(a0) != len(a1):
-        return
+        return False
     if weight is not None:
         xlst = [weight, a1, *args]
     else:
@@ -1275,49 +1321,20 @@ def get_default_canvas(**kwargs):
     return canvas
 
 
-def get_spectra(age: list, sage: list, Ar39k_list: list, plateau_steps: list = None, uf: int = 1, plt_sfactor: int = 1,
-                **kwargs):
+def get_spectra(age: list, sage: list, Ar39k_list: list):
     """
     :param age:
     :param sage: 1 sigma
     :param Ar39k_list:
-    :param plateau_steps: plateau steps index
-    :param uf:
-    :param plt_sfactor:
-    :return: canvas, x, y1, y2
+    :return: x, y1, y2
     """
-    kwargs = kwargs.pop('properties', kwargs)
-    '''spectra line properties'''
-    showLabel = kwargs.pop('showLabel', True)  # display step numbers
-    line_width = kwargs.pop('spectra_w', 0)  # line width
-    line_style = kwargs.pop('spectra_s', 'none')  # line style
-    spectra_b_c = kwargs.pop('spectra_b_c', 'none')  # spectra line color
-    spectra_f_c = kwargs.pop('spectra_f_c', 'none')  # spectra fill color
-    plateau_b_c = kwargs.pop('plateau_b_c', 'none')  # plateau line color
-    plateau_f_c = kwargs.pop('plateau_f_c', 'none')  # plateau fill color
-    '''calculate points'''
-    sum_39Ark = sum(Ar39k_list);
-    n = len(Ar39k_list)
-    '''error and unit'''
-    sage = [i * plt_sfactor for i in sage]
-    age = [i * uf for i in age]
-    sage = [i * uf for i in sage]
-    # k1、k2、k3、k4为中间过渡参数，x为年龄谱散点横坐标，y1、y2为年龄谱两条线的纵坐标
-    k1 = []
-    k2 = []
-    k3 = []
-    k4 = []
-    y1 = []
-    y2 = []
-    x = []
-    n = len(age)
-    for i in range(n):
-        y_uplimit = age[i] + sage[i]
-        y_lowlimit = age[i] - sage[i]
-        k1.append(y_uplimit)
-        k2.append(y_lowlimit)
-        k4.append(float(Ar39k_list[i] / sum_39Ark))
-        k3.append(sum(k4))
+    sum_39Ark = sum(Ar39k_list)
+    x, y1, y2 = [], [], []
+    n = min(len(age), len(sage), len(Ar39k_list))
+    k1 = [age[i] + sage[i] for i in range(n)]  # upper
+    k2 = [age[i] - sage[i] for i in range(n)]  # lower
+    k4 = [float(i / sum_39Ark) for i in Ar39k_list]
+    k3 = [sum(k4[:i+1]) for i in range(n)]
     for i in range(n + 1):
         if i == 0:
             x.append(0)
@@ -1347,27 +1364,7 @@ def get_spectra(age: list, sage: list, Ar39k_list: list, plateau_steps: list = N
         else:
             pass
     x = [x[i] * 100 for i in range(n * 2)]
-    '''create canvas'''
-    x_label = 'Cumulative ' + r'$\mathregular{^{39}Ar}$' + ' released (%)'
-    y_label = 'Apparent Age (Ma)'
-    title = 'Age spectrum'
-    canvas = get_default_canvas(x_label=x_label, y_label=y_label, title=title)
-    '''spectra line'''
-    canvas.axes.plot(x, y1, color=spectra_b_c, linestyle=line_style, linewidth=line_width, markersize=0)
-    canvas.axes.plot(x, y2, color=spectra_b_c, linestyle=line_style, linewidth=line_width, markersize=0)
-    if showLabel:
-        for i in range(n):
-            canvas.axes.annotate(str(i + 1), xy=((x[i * 2] + x[i * 2 + 1]) / 2, max(y1[i * 2], y2[i * 2])),
-                                 xytext=(-5, 5), textcoords='offset points')
-    canvas.axes.set_xlim(0, 100)
-    canvas.axes.set_ylim(min(min(y1), min(y2)) * 0.5, max(max(y1), max(y2)) * 1.5)
-    '''filling if the fill color is selected'''
-    if spectra_f_c != 'none' and spectra_f_c is not None:
-        for i in range(len(age)):
-            fill_x = [x[i * 2], x[i * 2], x[i * 2 + 1], x[i * 2 + 1]]
-            fill_y = [y1[i * 2], y2[i * 2], y2[i * 2 + 1], y1[i * 2 + 1]]
-            canvas.axes.fill(fill_x, fill_y, spectra_f_c)
-    return canvas, x, y1, y2
+    return x, y1, y2
 
 
 def get_isochron(x: list, sx: list, y: list, sy: list, rho: list, b: float = None, m: float = None,
