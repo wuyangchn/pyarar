@@ -14,15 +14,15 @@ def corrBlank(sp: sample.UnkSample):
     Blank correction
     """
     if sp.CorrBlank:
-        sp.Ar36TempList, sp.Ar36TempErrorList \
+        sp.Ar36List, sp.Ar36ErrorList \
             = ProFunctions.corr_blank(sp.Ar36MList, sp.Ar36MErrorList, sp.Ar36BList, sp.Ar36BErrorList)
-        sp.Ar37TempList, sp.Ar37TempErrorList \
+        sp.Ar37List, sp.Ar37ErrorList \
             = ProFunctions.corr_blank(sp.Ar37MList, sp.Ar37MErrorList, sp.Ar37BList, sp.Ar37BErrorList)
-        sp.Ar38TempList, sp.Ar38TempErrorList \
+        sp.Ar38List, sp.Ar38ErrorList \
             = ProFunctions.corr_blank(sp.Ar38MList, sp.Ar38MErrorList, sp.Ar38BList, sp.Ar38BErrorList)
-        sp.Ar39TempList, sp.Ar39TempErrorList \
+        sp.Ar39List, sp.Ar39ErrorList \
             = ProFunctions.corr_blank(sp.Ar39MList, sp.Ar39MErrorList, sp.Ar39BList, sp.Ar39BErrorList)
-        sp.Ar40TempList, sp.Ar40TempErrorList \
+        sp.Ar40List, sp.Ar40ErrorList \
             = ProFunctions.corr_blank(sp.Ar40MList, sp.Ar40MErrorList, sp.Ar40BList, sp.Ar40BErrorList)
 
 def corrDiscr(sp: sample.UnkSample):
@@ -38,13 +38,13 @@ def corrDiscr(sp: sample.UnkSample):
         MDF, sMDF = sp.MDF, sp.MDFError  # absolute error
         M36, M37, M38, M39, M40 = sp.Ar36Mass, sp.Ar37Mass, sp.Ar38Mass, sp.Ar39Mass, sp.Ar40Mass
         c = ProFunctions.corr_discr(MDF, sMDF, M36, M40)  # 36Ar
-        sp.Ar36TempList, sp.Ar36TempErrorList = _func(sp.Ar36TempList, sp.Ar36TempErrorList, c)
+        sp.Ar36List, sp.Ar36ErrorList = _func(sp.Ar36List, sp.Ar36ErrorList, c)
         c = ProFunctions.corr_discr(MDF, sMDF, M37, M40)  # 37Ar
-        sp.Ar37TempList, sp.Ar37TempErrorList = _func(sp.Ar37TempList, sp.Ar37TempErrorList, c)
+        sp.Ar37List, sp.Ar37ErrorList = _func(sp.Ar37List, sp.Ar37ErrorList, c)
         c = ProFunctions.corr_discr(MDF, sMDF, M38, M40)  # 38Ar
-        sp.Ar38TempList, sp.Ar38TempErrorList = _func(sp.Ar38TempList, sp.Ar38TempErrorList, c)
+        sp.Ar38List, sp.Ar38ErrorList = _func(sp.Ar38List, sp.Ar38ErrorList, c)
         c = ProFunctions.corr_discr(MDF, sMDF, M39, M40)  # 39Ar
-        sp.Ar39TempList, sp.Ar39TempErrorList = _func(sp.Ar39TempList, sp.Ar39TempErrorList, c)
+        sp.Ar39List, sp.Ar39ErrorList = _func(sp.Ar39List, sp.Ar39ErrorList, c)
 
 def corrDecay(sp: sample.UnkSample):
     """
@@ -58,15 +58,15 @@ def corrDecay(sp: sample.UnkSample):
     t2 = sp.IrradiationEndTimeList  # irradiation end time in second
     t3 = sp.IrradiationDurationList  # irradiation duration time in hour
     if sp.Corr37ArDecay:
-        for row in range(len(sp.Ar37TempList)):
+        for row in range(len(sp.Ar37List)):
             c = ProFunctions.corr_decay(sp.MDateTimeList[row], t2, t3, sp.Ar37Const, sp.Ar37ConstError)  # 37Ar
-            sp.Ar37TempList[row], sp.Ar37TempErrorList[row] \
-                = _func(sp.Ar37TempList[row], sp.Ar37TempErrorList[row], c)
+            sp.Ar37List[row], sp.Ar37ErrorList[row] \
+                = _func(sp.Ar37List[row], sp.Ar37ErrorList[row], c)
     if sp.Corr39ArDecay:
-        for row in range(len(sp.Ar39TempList)):
+        for row in range(len(sp.Ar39List)):
             c = ProFunctions.corr_decay(sp.MDateTimeList[row], t2, t3, sp.Ar39Const, sp.Ar39ConstError)  # 39Ar
-            sp.Ar39TempList[row], sp.Ar39TempErrorList[row] \
-                = _func(sp.Ar39TempList[row], sp.Ar39TempErrorList[row], c)
+            sp.Ar39List[row], sp.Ar39ErrorList[row] \
+                = _func(sp.Ar39List[row], sp.Ar39ErrorList[row], c)
 
 def degasPattern(sp: sample.UnkSample):
     """
@@ -87,7 +87,7 @@ def degasPattern(sp: sample.UnkSample):
         return [(ProFunctions.get_datetime(t_year, t_month, t_day, t_hour, t_min) - i) / (3600 * 24 * 365.242) for i in
                 endtime]
     # Corr Ca
-    sp.Ar37DegasCa, sp.Ar37DegasCaError = _mul(sp.Ar37TempList, sp.Ar37TempErrorList, 1, 0, sp.CorrCa)
+    sp.Ar37DegasCa, sp.Ar37DegasCaError = _mul(sp.Ar37List, sp.Ar37ErrorList, 1, 0, sp.CorrCa)
     # Force negative values to zero
     sp.Ar37DegasCa = [0 if i < 0 and sp.ForceNegative else i for i in sp.Ar37DegasCa]
     sp.Ar36DegasCa, sp.Ar36DegasCaError \
@@ -99,7 +99,7 @@ def degasPattern(sp: sample.UnkSample):
     sp.Ar40DegasCa, sp.Ar40DegasCaError = _mul(sp.Ar37DegasCa, sp.Ar37DegasCaError, 0, 0, False)
     # Corr K
     sp.Ar39DegasK, sp.Ar39DegasKError\
-        = _sub(sp.Ar39TempList, sp.Ar39TempErrorList, sp.Ar39DegasCa, sp.Ar39DegasCaError, sp.CorrK)
+        = _sub(sp.Ar39List, sp.Ar39ErrorList, sp.Ar39DegasCa, sp.Ar39DegasCaError, sp.CorrK)
     # Force negative values to zero
     sp.Ar39DegasK = [0 if i < 0 and sp.ForceNegative else i for i in sp.Ar39DegasK]
     sp.Ar40DegasK, sp.Ar40DegasKError\
@@ -114,12 +114,12 @@ def degasPattern(sp: sample.UnkSample):
             raise ValueError('Do not Correct Cl')
         stand_time_year = [_second(datetime, sp.IrradiationEndTimeList)[-1] for datetime in sp.MDateTimeList]
         # 36Ar deduct Ca, that is sum of 36Ara and 36ArCl
-        v36acl = [sp.Ar36TempList[i] - sp.Ar36DegasCa[i] for i in range(len(sp.Ar36TempList))]
-        sv36acl = [ProFunctions.error_add(sp.Ar36TempErrorList[i], sp.Ar36DegasCaError[i]) for i in
-                   range(len(sp.Ar36TempErrorList))]
+        v36acl = [sp.Ar36List[i] - sp.Ar36DegasCa[i] for i in range(len(sp.Ar36List))]
+        sv36acl = [ProFunctions.error_add(sp.Ar36ErrorList[i], sp.Ar36DegasCaError[i]) for i in
+                   range(len(sp.Ar36ErrorList))]
         # 38Ar deduct K and Ca, that is sum of 38Ara and 38ArCl
-        v38acl = [sp.Ar38TempList[i] - sp.Ar38DegasK[i] - sp.Ar38DegasCa[i] for i in range(len(sp.Ar38TempList))]
-        sv38acl = [ProFunctions.error_add(sp.Ar38TempErrorList[i], sp.Ar38DegasKError[i], sp.Ar38DegasCaError[i])
+        v38acl = [sp.Ar38List[i] - sp.Ar38DegasK[i] - sp.Ar38DegasCa[i] for i in range(len(sp.Ar38List))]
+        sv38acl = [ProFunctions.error_add(sp.Ar38ErrorList[i], sp.Ar38DegasKError[i], sp.Ar38DegasCaError[i])
                    for i in range(len(v38acl))]
         v3 = [sp.Cl36vs38Productivity * (1 - exp(-1 * sp.Cl36Const * stand_time_year[i])) for i in
               range(len(stand_time_year))]
@@ -162,10 +162,10 @@ def degasPattern(sp: sample.UnkSample):
             raise ValueError('Do not Correct Cl')
 
         # 36ArAir
-        sp.Ar36DegasAir = [sp.Ar36TempList[i] - sp.Ar36DegasCa[i] - sp.Ar36DegasCl[i] - sp.Ar36DegasK[i] for i in
-                           range(len(sp.Ar36TempList))]
+        sp.Ar36DegasAir = [sp.Ar36List[i] - sp.Ar36DegasCa[i] - sp.Ar36DegasCl[i] - sp.Ar36DegasK[i] for i in
+                           range(len(sp.Ar36List))]
         sp.Ar36DegasAirError = [
-            ProFunctions.error_add(sp.Ar36TempErrorList[i], sp.Ar36DegasCaError[i], sp.Ar36DegasClError[i],
+            ProFunctions.error_add(sp.Ar36ErrorList[i], sp.Ar36DegasCaError[i], sp.Ar36DegasClError[i],
                                    sp.Ar36DegasKError[i])for i in range(len(sp.Ar36DegasCl))]
         # Force negative values to zero
         sp.Ar36DegasAir = [0 if i < 0 and sp.ForceNegative else i for i in sp.Ar36DegasAir]
@@ -190,11 +190,11 @@ def degasPattern(sp: sample.UnkSample):
         print('Error in corr Air: %s' % str(e))
 
     # 40Arr
-    sp.Ar40DegasR = [sp.Ar40TempList[i] - sp.Ar40DegasCa[i] - sp.Ar40DegasCl[i] - sp.Ar40DegasK[i] - sp.Ar40DegasAir[i]
-                     for i in range(len(sp.Ar40TempList))]
+    sp.Ar40DegasR = [sp.Ar40List[i] - sp.Ar40DegasCa[i] - sp.Ar40DegasCl[i] - sp.Ar40DegasK[i] - sp.Ar40DegasAir[i]
+                     for i in range(len(sp.Ar40List))]
     sp.Ar40DegasRError = [
-        ProFunctions.error_add(sp.Ar40TempErrorList[i], sp.Ar40DegasCaError[i], sp.Ar40DegasClError[i],
-                               sp.Ar40DegasKError[i], sp.Ar40DegasAirError[i]) for i in range(len(sp.Ar40TempList))]
+        ProFunctions.error_add(sp.Ar40ErrorList[i], sp.Ar40DegasCaError[i], sp.Ar40DegasClError[i],
+                               sp.Ar40DegasKError[i], sp.Ar40DegasAirError[i]) for i in range(len(sp.Ar40List))]
     # Force negative values to zero
     sp.Ar40DegasR = [0 if i < 0 and sp.ForceNegative else i for i in sp.Ar40DegasR]
 
@@ -268,9 +268,9 @@ def calcRatios(sp: sample.UnkSample):
         # y / z
         k2 = [y[i] / z[i] if z[i] != 0 else 0 for i in range(_n)]
         k3 = [ProFunctions.error_div((y[i], sy[i]), (z[i], sz[i])) if z[i] != 0 else 0 for i in range(_n)]
-        k4 = [ProFunctions.error_cor(sx[i] / x[i], sy[i] / y[i], sz[i] / z[i]) if x[i] * y[i] * z[i] != 0 else 0
-              for i in range(_n)]
-        return [k0, k1, k2, k3, k4, []]
+        pho = [ProFunctions.error_cor(sx[i] / x[i], sy[i] / y[i], sz[i] / z[i]) if x[i] * y[i] * z[i] != 0 else 0
+               for i in range(_n)]
+        return [k0, k1, k2, k3, pho, []]
     # Cl isochron 1: 39ArK / 38ArCl vs. 40Ar* / 38ArCl, 40Ar* = 40ArCl+r
     sp.ClNormalIsochron = _getIsochron(sp.Ar39DegasK, sp.Ar39DegasKError,
                                        sp.Ar40DegasR, sp.Ar40DegasRError,
@@ -284,10 +284,10 @@ def calcRatios(sp: sample.UnkSample):
                                   sp.Ar38DegasCl, sp.Ar38DegasClError,
                                   sp.Ar39DegasK, sp.Ar39DegasKError)
     # normal isochron: 39ArK / 36Ara vs. 40Ar* / 36Ara, 40Ar* = 40Ara+r, however it is actually 40Ara+r+Cl
-    c = [sp.Ar40TempList[i] - sp.Ar40DegasK[i] - sp.Ar40DegasCa[i] - sp.Ar40DegasCl[i]
-         for i in range(len(sp.Ar40TempList))]
-    sc = [ProFunctions.error_add(sp.Ar40TempErrorList[i], sp.Ar40DegasKError[i], sp.Ar40DegasCaError[i],
-                                 sp.Ar40DegasClError[i]) for i in range(len(sp.Ar40TempList))]
+    c = [sp.Ar40List[i] - sp.Ar40DegasK[i] - sp.Ar40DegasCa[i] - sp.Ar40DegasCl[i]
+         for i in range(len(sp.Ar40List))]
+    sc = [ProFunctions.error_add(sp.Ar40ErrorList[i], sp.Ar40DegasKError[i], sp.Ar40DegasCaError[i],
+                                 sp.Ar40DegasClError[i]) for i in range(len(sp.Ar40List))]
     c = [0 if i < 0 else i for i in c]
     sp.AtmNormalIsochron = _getIsochron(sp.Ar39DegasK, sp.Ar39DegasKError,
                                         c, sc,
@@ -298,31 +298,11 @@ def calcRatios(sp: sample.UnkSample):
                                          c, sc)
     # 3D isochron: 39ArK / 40Ar* vs. 36Ara / 40Ar* vs. 38ArCl / 40Ar*, 40Ar* = 40Ara+r+Cl
     c1 = _getIsochron(sp.Ar38DegasCl, sp.Ar38DegasClError, sp.Ar39DegasK, sp.Ar39DegasKError, c, sc)
-    sp.ThreeDimIsochron = [sp.AtmInverseIsochron[0], sp.AtmInverseIsochron[1],
-                           sp.AtmInverseIsochron[2], sp.AtmInverseIsochron[3],
-                           c1[0], c1[1]]
-
-def isochronAge(sp: sample.UnkSample):
-    def _getIsochronAge(iso, isNormal=False, isInverse=False, isKIsochron=False):
-        x, sx, y, sy, pho = [[i[j] for j in sp.IsochronSelectedPoints] for i in iso]
-        k0 = ProFunctions.isochron_regress(x, sx, y, sy, pho,
-                                           isNormal=isNormal, isInverse=isInverse, isKIsochron=isKIsochron,
-                                           statistics=True, convergence=sp.York2FitConvergence,
-                                           iteration=sp.York2FitIteration)
-        if not k0:
-            return ['Null'] * 16
-        k1 = calcAge(k0[2], k0[3], sp)
-        k2 = (x, sx, y, sy, pho, sp.IsochronSelectedPoints)
-        '''list in order: '''
-        '''0-3: Age, analytical error, internal error, full external error'''
-        '''4-15: ratio, error, 40r/39k, error, MSWD, b, seb, m, sem, convergence, iterations, error magnification'''
-        '''16-21: x, sx, y, sy, pho, sp.IsochronSelectedPoints'''
-        return [i for i in k1 + k0 + k2]
-    sp.ClNormalIsochron[5] = _getIsochronAge(sp.ClNormalIsochron[:5], isNormal=True)
-    sp.ClInverseIsochron[5] = _getIsochronAge(sp.ClInverseIsochron[:5], isInverse=True)
-    sp.ClKIsochron[5] = _getIsochronAge(sp.ClKIsochron[:5], isKIsochron=True)
-    sp.AtmNormalIsochron[5] = _getIsochronAge(sp.AtmNormalIsochron[:5], isNormal=True)
-    sp.AtmInverseIsochron[5] = _getIsochronAge(sp.AtmInverseIsochron[:5], isInverse=True)
+    sp.ThreeDIsochron = [sp.AtmInverseIsochron[0], sp.AtmInverseIsochron[1],  # 39ArK / 40Ar*, error --> Z
+                         sp.AtmInverseIsochron[2], sp.AtmInverseIsochron[3],  # 36Ara / 40Ar*, error --> X
+                         c1[0], c1[1],  # 38ArCl / 40Ar*, error --> Y
+                         sp.AtmInverseIsochron[4], sp.ClInverseIsochron[4], c1[4],  # pho_ZX, pho_ZY, pho_XZ
+                         []]  # age
 
 def calcAge(F, sF, sp: sample.UnkSample):
     k0 = ProFunctions.calc_age(F, sF, sp.JValue, sp.JValueError, sp.K40Const, sp.K40ConstError,
@@ -346,6 +326,28 @@ def calcAge(F, sF, sp: sample.UnkSample):
                                standard_40K_K=sp.StandardAr40vsK, standard_40K_K_error=sp.StandardAr40vsKError)
     return k0
 
+def calcIsochronAge(sp: sample.UnkSample):
+    def _getIsochronAge(iso, isNormal=False, isInverse=False, isKIsochron=False):
+        x, sx, y, sy, pho = [[i[j] for j in sp.IsochronSelectedPoints] for i in iso]
+        k0 = ProFunctions.isochron_regress(x, sx, y, sy, pho,
+                                           isNormal=isNormal, isInverse=isInverse, isKIsochron=isKIsochron,
+                                           statistics=True, convergence=sp.York2FitConvergence,
+                                           iteration=sp.York2FitIteration)
+        if not k0:
+            return ['Null'] * 16
+        k1 = calcAge(k0[2], k0[3], sp)
+        k2 = (x, sx, y, sy, pho, sp.IsochronSelectedPoints)
+        '''list in order: '''
+        '''0-3: Age, analytical error, internal error, full external error'''
+        '''4-15: ratio, error, 40r/39k, error, MSWD, b, seb, m, sem, convergence, iterations, error magnification'''
+        '''16-21: x, sx, y, sy, pho, sp.IsochronSelectedPoints'''
+        return [i for i in k1 + k0 + k2]
+    sp.ClNormalIsochron[5] = _getIsochronAge(sp.ClNormalIsochron[:5], isNormal=True)
+    sp.ClInverseIsochron[5] = _getIsochronAge(sp.ClInverseIsochron[:5], isInverse=True)
+    sp.ClKIsochron[5] = _getIsochronAge(sp.ClKIsochron[:5], isKIsochron=True)
+    sp.AtmNormalIsochron[5] = _getIsochronAge(sp.AtmNormalIsochron[:5], isNormal=True)
+    sp.AtmInverseIsochron[5] = _getIsochronAge(sp.AtmInverseIsochron[:5], isInverse=True)
+
 def calcPlateauAge(sp: sample.UnkSample):
     def _plateau(points: list):
         F, sF = [[i[j] for j in points] for i in [sp.FValues, sp.FValuesError]]
@@ -365,3 +367,16 @@ def calcTFAge(sp: sample.UnkSample):
     F, sF = a0 / a1, ProFunctions.error_div((a0, e0), (a1, e1))
     k0, k1, k2, k3 = calcAge(F, sF, sp)
     sp.TotalFusionAge = [k0, k1, k2, k3, F, sF, len(sp.Ar40DegasR)]  # TF age, e1, e2, e3, 40Arr/39Ark, error, dp
+
+def calc3DIsochronAge(sp: sample.UnkSample):
+    def plane(_k, _x, _y):
+        _z = _k[0] + _k[5][0] * _x + _k[5][1] * _y
+        return _z
+
+    def _pick(a0: list):
+        return [a0[i] for i in sp.IsochronSelectedPoints]
+
+    z, sz, x, sx, y, sy, pho_zx, pho_zy, pho_xy, [] = sp.ThreeDIsochron
+    k = ProFunctions.intercept_linest(_pick(z), _pick(x), _pick(y))
+    F = plane(k, 0, 0)
+    sp.ThreeDIsochron[9] = [i for i in calcAge(F, 0, sp)]

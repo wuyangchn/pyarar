@@ -499,11 +499,11 @@ def isochron_regress(x: list, sx: list, y: list, sy: list, ri: list, isNormal: b
     if isNormal:
         k0, k1, k2, k3 = b, seb, m, sem
     else:
-        k0, k1 = 1 / b, error_div((1, 0), (b, seb))
+        k0, k1 = 1 / b if b != 0 else 0, error_div((1, 0), (b, seb)) if b != 0 else 0
         new_b, new_seb, new_m, new_sem, mswd, conv, Di, errmag = \
             wtd_york2_regression(y, sy, x, sx, ri, convergence=conv_tol, iteration=iter_num)
         if isInverse:
-            k2, k3 = 1 / new_b, error_div((1, 0), (new_b, new_seb))
+            k2, k3 = 1 / new_b if new_b != 0 else 0, error_div((1, 0), (new_b, new_seb)) if new_b != 0 else 0
         else:
             k2, k3 = new_b, new_seb
     return k0, k1, k2, k3,  mswd, b, seb, m, sem, conv, Di, errmag
@@ -587,6 +587,7 @@ def get_ar40rar39k(x: list, sx: list, y: list, sy: list, rho: list, atm_ratio=No
 
 def error_cor(sX: float, sY: float, sZ: float):
     """
+    calculate correlation coefficient of errors.
     :param sX: relative error of X, where X/Z vs. Y/Z
     :param sY: relative error of Y
     :param sZ: relative error of Z

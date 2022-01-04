@@ -32,17 +32,18 @@ b.save()
 """read age"""
 def calc(unksp: pyarar.sample.UnkSample):
     unksp.readDataFromAgeFile()
-    unksp.IsochronSelectedPoints = [i for i in range(len(unksp.Ar36MList))]
+    unksp.IsochronSelectedPoints = [_i for _i in range(3, 13)]
     pyarar.maincalc.corrBlank(unksp)
     pyarar.maincalc.corrDiscr(unksp)
     pyarar.maincalc.corrDecay(unksp)
     pyarar.maincalc.degasPattern(unksp)
     pyarar.maincalc.calcApparentAge(unksp)
     pyarar.maincalc.calcRatios(unksp)
-    pyarar.maincalc.isochronAge(unksp)
+    pyarar.maincalc.calcIsochronAge(unksp)
     pyarar.maincalc.calcKCaClRatios(unksp)
     pyarar.maincalc.calcPlateauAge(unksp)
     pyarar.maincalc.calcTFAge(unksp)
+    pyarar.maincalc.calc3DIsochronAge(unksp)
 
 
 age_dir = "C:\\Users\\Young\\Projects\\B02Ar-Ar年代学\\数据集合\\Data\\06age"
@@ -64,3 +65,5 @@ for filename in files:
 for i in res:
     print("{}  ID: {}, TF Age: {}, {}, {}".format(i.SampleName, i.SampleID, i.TotalFusionAge[0], i.TotalFusionAge[4],
                                                   i.TotalFusionAge[6]))
+    if i.SampleName == "16WHA0420":
+        print(i.ThreeDIsochron[9])

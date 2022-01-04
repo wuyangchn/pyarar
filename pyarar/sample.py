@@ -42,6 +42,9 @@ class Sample:
         ExperimentAnalyst: str, default: None
             experiment analyst
 
+        Instrument: str, default: None
+            instrument name
+
         LaboratoryName: str, default: None
             laboratory name
 
@@ -54,6 +57,7 @@ class Sample:
         self.SampleDescription: str = kwargs.pop("SampleDescription", "")
         self.ExperimentName: str = kwargs.pop("ExperimentName", "")
         self.ExperimentAnalyst: str = kwargs.pop("ExperimentAnalyst", "")
+        self.Instrument: str = kwargs.pop("Instrument", "")
         self.LaboratoryName: str = kwargs.pop("LaboratoryName", "")
         self.LaboratoryInfo: str = kwargs.pop("LaboratoryInfo", "")
 
@@ -87,16 +91,16 @@ class Sample:
         self.Ar39BErrorList: list = kwargs.pop("Ar39BErrorList", [])
         self.Ar40BErrorList: list = kwargs.pop("Ar40BErrorList", [])
         """temporary list used to save correction values"""
-        self.Ar36TempList: list = kwargs.pop("Ar36TempList", [])
-        self.Ar37TempList: list = kwargs.pop("Ar37TempList", [])
-        self.Ar38TempList: list = kwargs.pop("Ar38TempList", [])
-        self.Ar39TempList: list = kwargs.pop("Ar39TempList", [])
-        self.Ar40TempList: list = kwargs.pop("Ar40TempList", [])
-        self.Ar36TempErrorList: list = kwargs.pop("Ar36TempErrorList", [])
-        self.Ar37TempErrorList: list = kwargs.pop("Ar37TempErrorList", [])
-        self.Ar38TempErrorList: list = kwargs.pop("Ar38TempErrorList", [])
-        self.Ar39TempErrorList: list = kwargs.pop("Ar39TempErrorList", [])
-        self.Ar40TempErrorList: list = kwargs.pop("Ar40TempErrorList", [])
+        self.Ar36List: list = kwargs.pop("Ar36TempList", [])
+        self.Ar37List: list = kwargs.pop("Ar37TempList", [])
+        self.Ar38List: list = kwargs.pop("Ar38TempList", [])
+        self.Ar39List: list = kwargs.pop("Ar39TempList", [])
+        self.Ar40List: list = kwargs.pop("Ar40TempList", [])
+        self.Ar36ErrorList: list = kwargs.pop("Ar36TempErrorList", [])
+        self.Ar37ErrorList: list = kwargs.pop("Ar37TempErrorList", [])
+        self.Ar38ErrorList: list = kwargs.pop("Ar38TempErrorList", [])
+        self.Ar39ErrorList: list = kwargs.pop("Ar39TempErrorList", [])
+        self.Ar40ErrorList: list = kwargs.pop("Ar40TempErrorList", [])
 
     def save(self):
         """
@@ -188,7 +192,7 @@ class UnkSample(Sample):
         self.ClKIsochron: list = kwargs.pop("ClKIsochron", [])
         self.AtmNormalIsochron: list = kwargs.pop("AtmNormalIsochron", [])
         self.AtmInverseIsochron: list = kwargs.pop("AtmInverseIsochron", [])
-        self.ThreeDimIsochron: list = kwargs.pop("ThreeDimIsochron", [])
+        self.ThreeDIsochron: list = kwargs.pop("ThreeDimIsochron", [])
         self.IsochronSelectedPoints: list = kwargs.pop("IsochronSelectedPoints", [])
         self.PlateauAges: list = kwargs.pop("PlateauAges", [])
         self.TotalFusionAge: list = kwargs.pop("TotalFusionAge", [])
@@ -327,6 +331,7 @@ class UnkSample(Sample):
         self.IrradiationEndTimeList: list = kwargs.pop("IrradiationEndTimeList", IrradiationEndTimeList)
         self.IrradiationDurationList: list = kwargs.pop("IrradiationDurationList", IrradiationDurationList)
 
+        self.StandardName: str = kwargs.pop("StandardName", "")
         self.StandardAge: float = kwargs.pop("StandardAge", StandardAge)
         self.StandardAgeError: float = kwargs.pop("StandardAgeError", StandardAgeError)
         self.Ar40Concentration: float = kwargs.pop("Ar40Concentration", Ar40Concentration)
@@ -421,12 +426,17 @@ class UnkSample(Sample):
             # read and rewrite calculation params
             logs01_params = book_contents['Logs01']
             # read and rewrite irradiation params
+            self.SampleName = str(data_tables_value[44][5])
+            self.SampleMineral = str(data_tables_value[45][5])
+            self.ExperimentAnalyst = str(data_tables_value[47][5])
             self.StandardAge = float(data_tables_value[49][5])
             self.StandardAgeError = float(data_tables_value[50][5]) / 100 * float(data_tables_value[49][5])
             self.JValue = float(data_tables_value[51][5])
             self.JValueError = float(data_tables_value[52][5]) / 100 * float(data_tables_value[51][5])
             self.MDF = float(data_tables_value[53][5])
             self.MDFError = float(data_tables_value[54][5]) / 100 * float(data_tables_value[53][5])
+            self.ExperimentName = str(data_tables_value[65][5])
+            self.StandardName = str(data_tables_value[67][5])
             self.Ar40vsAr36Trapped = float(data_tables_value[71][5])
             self.Ar40vsAr36TrappedError = float(data_tables_value[72][5]) / 100 * float(data_tables_value[71][5])
             self.Ar40vsAr36Cosmo = float(data_tables_value[73][5])
