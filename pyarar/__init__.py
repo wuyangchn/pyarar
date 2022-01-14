@@ -5,4 +5,4 @@
 # @Date   : 2021/12/19
 # @Email  : wuy@cug.edu.cn
 
-from pyarar import calcFuncs, fileFuncs, constants, sample, maincalc
+from pyarar import calcFuncs, fileFuncs, plotFuncs, sampleFuncs, constants, sample, mainProcess

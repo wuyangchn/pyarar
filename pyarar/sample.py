@@ -53,20 +53,23 @@ class Sample:
         """
         self.SampleID: int = int((datetime.datetime.now() - datetime.datetime(2000, 1, 1)).total_seconds() * 100)
         self.SampleName: str = kwargs.pop("SampleName", "")
+        # Sample Type: UnkSample -> Unknown Sample, Monitor -> Monitor Sample, AirSample -> Air Sample
         self.SampleType: str = kwargs.pop("SampleType", "")
+        self.SampleMineral: str = kwargs.pop("SampleMineral", "")
         self.SampleDescription: str = kwargs.pop("SampleDescription", "")
         self.ExperimentName: str = kwargs.pop("ExperimentName", "")
         self.ExperimentAnalyst: str = kwargs.pop("ExperimentAnalyst", "")
+        self.AnalysisDate: datetime.datetime = datetime.datetime.now()
         self.Instrument: str = kwargs.pop("Instrument", "")
         self.LaboratoryName: str = kwargs.pop("LaboratoryName", "")
         self.LaboratoryInfo: str = kwargs.pop("LaboratoryInfo", "")
 
         """isotopes value"""
         """sequences, steps and experimental date times"""
-        self.MSequenceList: list = kwargs.pop("MSequenceList", [])
-        self.BSequenceList: list = kwargs.pop("BSequenceList", [])
-        self.MStepsList: list = kwargs.pop("MStepsList", [])
-        self.BStepsList: list = kwargs.pop("BStepsList", [])
+        self.MSequenceList: list = kwargs.pop("MSequenceList", [])  # Measurement sequences name
+        self.BSequenceList: list = kwargs.pop("BSequenceList", [])  # Blank sequences name
+        self.MStepsList: list = kwargs.pop("MStepsList", [])  # Steps info, e.g., crush number, temperature
+        self.BStepsList: list = kwargs.pop("BStepsList", [])  # Blank steps labels, e.g., B, Blank
         self.MDateTimeList: list = kwargs.pop("MDateTimeList", [])  # [day, mouth, year, hour, min]
         """sample value"""
         self.Ar36MList: list = kwargs.pop("Ar36MList", [])
@@ -102,128 +105,27 @@ class Sample:
         self.Ar39ErrorList: list = kwargs.pop("Ar39TempErrorList", [])
         self.Ar40ErrorList: list = kwargs.pop("Ar40TempErrorList", [])
 
-    def save(self):
-        """
-        Save the instance.
+        """bool"""
+        self.LinMassDiscrLaw: bool = kwargs.pop("LinMassDiscrLaw", LinMassDiscrLaw)  # Mass Discrimination method: Lin
+        self.ExpMassDiscrLaw: bool = kwargs.pop("ExpMassDiscrLaw", ExpMassDiscrLaw)  # Mass Discrimination method: Exp
+        self.PowMassDiscrLaw: bool = kwargs.pop("PowMassDiscrLaw", PowMassDiscrLaw)  # Mass Discrimination method: Pow
+        self.ForceNegative: bool = kwargs.pop("ForceNegative", ForceNegative)  # Force negative value to zero
+        self.CorrBlank: bool = kwargs.pop("CorrBlank", CorrBlank)  # Correct blank
+        self.CorrDiscr: bool = kwargs.pop("CorrDiscr", CorrDiscr)  # Correct Mass discrimination
+        self.RelativeError: bool = kwargs.pop("RelativeError", RelativeError)  # Display relative error
 
-        Notes
-        -----
-        ab: adding to the last of the file if the filename has existed.
-        wb: replacing of the present file.
-        SampleID is unique for every instance.
-        """
-        if not os.path.exists(os.getcwd() + '\\save'):
-            os.mkdir(os.getcwd() + '\\save')
-        _path = 'save\\{}.sp'.format(str(self.SampleName))
-        _n = 0
-        while os.path.exists(_path):
-            '''rename if current sample name have already existed'''
-            '''whereas if the file actually have same ID with present instance, rename is prohibited'''
-            with open(_path, 'rb') as f:
-                res = pickle.load(f)
-            if res.SampleID == self.SampleID:
-                break
-            else:
-                _n = _n + 1
-                _path = 'save\\{}.{}.sp'.format(str(self.SampleName), _n)
-                # print('auto rename')
-        with open(_path, 'wb') as f:
-            f.write(pickle.dumps(self))
-
-class UnkSample(Sample):
-    def __init__(self, **kwargs):
-        """
-        Create a sample instance.
-
-        parameters
-        ----------
-        Calculation Params: float or bool, default: constants
-            user define or inherit from the default.
-
-        Attached files: str
-            the file path user input.
-        """
-        super().__init__(SampleType=kwargs.pop("SampleType", "UnkSample"),
-                         **kwargs)
-
-        self.SampleOwner: str = kwargs.pop("SampleOwner", "")
-        self.SampleMineral: str = kwargs.pop("SampleMineral", "")
-        self.SampleEstimatedAge: str = kwargs.pop("SampleEstimatedAge", "")
-        self.SampleLocation: str = kwargs.pop("SampleLocation", "")
-
-        """isotopes degas value"""
-        self.Ar36DegasCa: list = kwargs.pop("Ar36DegasCa", [])
-        self.Ar36DegasK: list = kwargs.pop("Ar36DegasK", [])
-        self.Ar36DegasCl: list = kwargs.pop("Ar36DegasCl", [])
-        self.Ar36DegasAir: list = kwargs.pop("Ar36DegasAir", [])
-        self.Ar37DegasCa: list = kwargs.pop("Ar37DegasCa", [])
-        self.Ar37DegasK: list = kwargs.pop("Ar37DegasK", [])
-        self.Ar37DegasCl: list = kwargs.pop("Ar37DegasCl", [])
-        self.Ar37DegasAir: list = kwargs.pop("Ar37DegasAir", [])
-        self.Ar38DegasCa: list = kwargs.pop("Ar38DegasCa", [])
-        self.Ar38DegasK: list = kwargs.pop("Ar38DegasK", [])
-        self.Ar38DegasCl: list = kwargs.pop("Ar38DegasCl", [])
-        self.Ar38DegasAir: list = kwargs.pop("Ar38DegasAir", [])
-        self.Ar39DegasCa: list = kwargs.pop("Ar39DegasCa", [])
-        self.Ar39DegasK: list = kwargs.pop("Ar39DegasK", [])
-        self.Ar39DegasCl: list = kwargs.pop("Ar39DegasCl", [])
-        self.Ar39DegasAir: list = kwargs.pop("Ar39DegasAir", [])
-        self.Ar40DegasCa: list = kwargs.pop("Ar40DegasCa", [])
-        self.Ar40DegasK: list = kwargs.pop("Ar40DegasK", [])
-        self.Ar40DegasCl: list = kwargs.pop("Ar40DegasCl", [])
-        self.Ar40DegasAir: list = kwargs.pop("Ar40DegasAir", [])
-        self.Ar40DegasR: list = kwargs.pop("Ar40DegasR", [])
-
-        self.FValues: list = kwargs.pop("FValues", [])
-        self.FValuesError: list = kwargs.pop("FValuesError", [])
-        self.ApparentAge: list = kwargs.pop("ApparentAge", [])
-        self.ApparentAgeAnalysisError: list = kwargs.pop("ApparentAgeAnalysisError", [])
-        self.ApparentAgeInternalError: list = kwargs.pop("ApparentAgeInternalError", [])
-        self.ApparentAgeFullExternalError: list = kwargs.pop("ApparentAgeFullExternalError", [])
-        self.KCaRatios: list = kwargs.pop("KCaRatios", [])
-        self.KCaRatiosError: list = kwargs.pop("KCaRatiosError", [])
-        self.KClRatios: list = kwargs.pop("KClRatios", [])
-        self.KClRatiosError: list = kwargs.pop("KClRatiosError", [])
-        self.CaClRatios: list = kwargs.pop("CaClRatios", [])
-        self.CaClRatiosError: list = kwargs.pop("CaClRatiosError", [])
-
-        self.ClNormalIsochron: list = kwargs.pop("ClNormalIsochron", [])
-        self.ClInverseIsochron: list = kwargs.pop("ClInverseIsochron", [])
-        self.ClKIsochron: list = kwargs.pop("ClKIsochron", [])
-        self.AtmNormalIsochron: list = kwargs.pop("AtmNormalIsochron", [])
-        self.AtmInverseIsochron: list = kwargs.pop("AtmInverseIsochron", [])
-        self.ThreeDIsochron: list = kwargs.pop("ThreeDimIsochron", [])
-        self.IsochronSelectedPoints: list = kwargs.pop("IsochronSelectedPoints", [])
-        self.PlateauAges: list = kwargs.pop("PlateauAges", [])
-        self.TotalFusionAge: list = kwargs.pop("TotalFusionAge", [])
-        self.SpectraLines: list = kwargs.pop("SpectraLines", [])
-
-        self.Ar36DegasCaError: list = kwargs.pop("Ar36DegasCaError", [])
-        self.Ar36DegasKError: list = kwargs.pop("Ar36DegasKError", [])
-        self.Ar36DegasClError: list = kwargs.pop("Ar36DegasClError", [])
-        self.Ar36DegasAirError: list = kwargs.pop("Ar36DegasAirError", [])
-        self.Ar37DegasCaError: list = kwargs.pop("Ar37DegasCaError", [])
-        self.Ar37DegasKError: list = kwargs.pop("Ar37DegasKError", [])
-        self.Ar37DegasClError: list = kwargs.pop("Ar37DegasClError", [])
-        self.Ar37DegasAirError: list = kwargs.pop("Ar37DegasAirError", [])
-        self.Ar38DegasCaError: list = kwargs.pop("Ar38DegasCaError", [])
-        self.Ar38DegasKError: list = kwargs.pop("Ar38DegasKError", [])
-        self.Ar38DegasClError: list = kwargs.pop("Ar38DegasClError", [])
-        self.Ar38DegasAirError: list = kwargs.pop("Ar38DegasAirError", [])
-        self.Ar39DegasCaError: list = kwargs.pop("Ar39DegasCaError", [])
-        self.Ar39DegasKError: list = kwargs.pop("Ar39DegasKError", [])
-        self.Ar39DegasClError: list = kwargs.pop("Ar39DegasClError", [])
-        self.Ar39DegasAirError: list = kwargs.pop("Ar39DegasAirError", [])
-        self.Ar40DegasCaError: list = kwargs.pop("Ar40DegasCaError", [])
-        self.Ar40DegasKError: list = kwargs.pop("Ar40DegasKError", [])
-        self.Ar40DegasClError: list = kwargs.pop("Ar40DegasClError", [])
-        self.Ar40DegasAirError: list = kwargs.pop("Ar40DegasAirError", [])
-        self.Ar40DegasRError: list = kwargs.pop("Ar40DegasRError", [])
-
+        """attach files"""
         self.RawFilePath: str = kwargs.pop("RawFilePath", "")
         self.FilteredFilePath: str = kwargs.pop("FilteredFilePath", "")
         self.AgeFilePath: str = kwargs.pop("FilteredFilePath", "")
 
+        """J value and MDF factor"""
+        self.JValue: float = kwargs.pop("JValue", JValue)
+        self.JValueError: float = kwargs.pop("JValueError", JValueError)
+        self.MDF: float = kwargs.pop("MDF", MDF)
+        self.MDFError: float = kwargs.pop("MDFError", MDFError)
+
+        """physical params"""
         self.K40vsKFractions: float = kwargs.pop("K40vsKFractions", K40vsKFractions)
         self.K40vsKFractionsError: float = kwargs.pop("K40vsKFractionsError", K40vsKFractionsError)
         self.Cl35vsCl37Fractions: float = kwargs.pop("Cl35vsClFractions", Cl35vsClFractions)
@@ -274,34 +176,6 @@ class UnkSample(Sample):
         self.yearConst: float = kwargs.pop("yearConst", yearConst)
         self.yearConstError: float = kwargs.pop("yearConstError", yearConstError)
 
-        self.JValue: float = kwargs.pop("JValue", JValue)
-        self.JValueError: float = kwargs.pop("JValueError", JValueError)
-        self.MDF: float = kwargs.pop("MDF", MDF)
-        self.MDFError: float = kwargs.pop("MDFError", MDFError)
-
-        self.Ar40vsAr36Const: float = kwargs.pop("Ar40vsAr36Const", Ar40vsAr36Const)
-        self.Ar40vsAr36ConstError: float = kwargs.pop("Ar40vsAr36ConstError", Ar40vsAr36ConstError)
-        self.York2FitConvergence: float = kwargs.pop("York2FitConvergence", York2FitConvergence)
-        self.York2FitIteration: float = kwargs.pop("York2FitIteration", York2FitIteration)
-        self.Fitting: str = kwargs.pop("Fitting", Fitting)
-        self.LinMassDiscrLaw: bool = kwargs.pop("LinMassDiscrLaw", LinMassDiscrLaw)
-        self.ExpMassDiscrLaw: bool = kwargs.pop("ExpMassDiscrLaw", ExpMassDiscrLaw)
-        self.PowMassDiscrLaw: bool = kwargs.pop("PowMassDiscrLaw", PowMassDiscrLaw)
-        self.ForceNegative: bool = kwargs.pop("ForceNegative", ForceNegative)
-        self.Corr37ArDecay: bool = kwargs.pop("Corr37ArDecay", Corr37ArDecay)
-        self.Corr39ArDecay: bool = kwargs.pop("Corr39ArDecay", Corr39ArDecay)
-        self.Corr36ClDecay: bool = kwargs.pop("Corr36ClDecay", Corr36ClDecay)
-        self.CorrBlank: bool = kwargs.pop("CorrBlank", CorrBlank)
-        self.CorrDiscr: bool = kwargs.pop("CorrDiscr", CorrDiscr)
-        self.CorrK: bool = kwargs.pop("CorrK", CorrK)
-        self.CorrCa: bool = kwargs.pop("CorrCa", CorrCa)
-        self.CorrCl: bool = kwargs.pop("CorrCl", CorrCl)
-        self.CorrAtm: bool = kwargs.pop("CorrAtm", CorrAtm)
-        self.RelativeError: bool = kwargs.pop("RelativeError", RelativeError)
-        self.UseDecayConst: bool = kwargs.pop("UseDecayConst", UseDecayConst)
-        self.UseInterceptCorrAtm: bool = kwargs.pop("UseInterceptCorrAtm", UseInterceptCorrAtm)
-        self.UseMinCalculation: bool = kwargs.pop("UseMinCalculation", UseMinCalculation)
-
         self.Ar40vsAr36Trapped: float = kwargs.pop("Ar40vsAr36Trapped", Ar40vsAr36Trapped)
         self.Ar40vsAr36Cosmo: float = kwargs.pop("Ar40vsAr36Cosmo", Ar40vsAr36Cosmo)
         self.Ar38vsAr36Trapped: float = kwargs.pop("Ar38vsAr36Trapped", Ar38vsAr36Trapped)
@@ -341,193 +215,175 @@ class UnkSample(Sample):
         self.StandardAr40vsK: float = kwargs.pop("StandardAr40vsK", StandardAr40vsK)
         self.StandardAr40vsKError: float = kwargs.pop("StandardAr40vsKError", StandardAr40vsKError)
 
-    def readDataFromRawFile(self, path=None):
+    def save(self):
         """
-        Read data from raw file.
+        Save the instance.
+
+        Notes
+        -----
+        ab: adding to the last of the file if the filename has existed.
+        wb: replacing of the present file.
+        SampleID is unique for every instance.
+        """
+        if not os.path.exists(os.getcwd() + '\\save'):
+            os.mkdir(os.getcwd() + '\\save')
+        _path = 'save\\{}.smp'.format(str(self.SampleName))
+        _n = 0
+        while os.path.exists(_path):
+            '''rename if current sample name have already existed'''
+            '''whereas if the file actually have same ID with present instance, rename is prohibited'''
+            with open(_path, 'rb') as f:
+                res = pickle.load(f)
+            if res.SampleID == self.SampleID:
+                break
+            else:
+                _n = _n + 1
+                _path = 'save\\{}.{}.smp'.format(str(self.SampleName), _n)
+                # print('auto rename')
+        with open(_path, 'wb') as f:
+            f.write(pickle.dumps(self))
+
+class UnkSample(Sample):
+    def __init__(self, **kwargs):
+        """
+        Create a sample instance.
 
         parameters
         ----------
-        path: str
-            raw file path.
-        """
-        self.initializeData()
-        if path:
-            self.RawFilePath = path
-        res = open_original_xls(self.RawFilePath)
-        if res:
-            pass
-            # self.Ar36MList = res[2]
+        Calculation Params: float or bool, default: constants
+            user define or inherit from the default.
 
-    def readDataFromFilteredFile(self, path=None):
+        Attached files: str
+            the file path user input.
         """
-        Read data from filtered file.
+        super().__init__(SampleType=kwargs.pop("SampleType", "UnkSample"),
+                         **kwargs)
+
+        self.SampleOwner: str = kwargs.pop("SampleOwner", "")
+        self.SampleEstimatedAge: str = kwargs.pop("SampleEstimatedAge", "")
+        self.SampleLocation: str = kwargs.pop("SampleLocation", "")
+
+        """isotopes degas value"""
+        self.Ar36DegasCa: list = kwargs.pop("Ar36DegasCa", [])
+        self.Ar36DegasK: list = kwargs.pop("Ar36DegasK", [])
+        self.Ar36DegasCl: list = kwargs.pop("Ar36DegasCl", [])
+        self.Ar36DegasAir: list = kwargs.pop("Ar36DegasAir", [])
+        self.Ar37DegasCa: list = kwargs.pop("Ar37DegasCa", [])
+        self.Ar37DegasK: list = kwargs.pop("Ar37DegasK", [])
+        self.Ar37DegasCl: list = kwargs.pop("Ar37DegasCl", [])
+        self.Ar37DegasAir: list = kwargs.pop("Ar37DegasAir", [])
+        self.Ar38DegasCa: list = kwargs.pop("Ar38DegasCa", [])
+        self.Ar38DegasK: list = kwargs.pop("Ar38DegasK", [])
+        self.Ar38DegasCl: list = kwargs.pop("Ar38DegasCl", [])
+        self.Ar38DegasAir: list = kwargs.pop("Ar38DegasAir", [])
+        self.Ar39DegasCa: list = kwargs.pop("Ar39DegasCa", [])
+        self.Ar39DegasK: list = kwargs.pop("Ar39DegasK", [])
+        self.Ar39DegasCl: list = kwargs.pop("Ar39DegasCl", [])
+        self.Ar39DegasAir: list = kwargs.pop("Ar39DegasAir", [])
+        self.Ar40DegasCa: list = kwargs.pop("Ar40DegasCa", [])
+        self.Ar40DegasK: list = kwargs.pop("Ar40DegasK", [])
+        self.Ar40DegasCl: list = kwargs.pop("Ar40DegasCl", [])
+        self.Ar40DegasAir: list = kwargs.pop("Ar40DegasAir", [])
+        self.Ar40DegasR: list = kwargs.pop("Ar40DegasR", [])
+
+        self.FValues: list = kwargs.pop("FValues", [])
+        self.FValuesError: list = kwargs.pop("FValuesError", [])
+        self.ApparentAge: list = kwargs.pop("ApparentAge", [])
+        self.ApparentAgeAnalysisError: list = kwargs.pop("ApparentAgeAnalysisError", [])
+        self.ApparentAgeInternalError: list = kwargs.pop("ApparentAgeInternalError", [])
+        self.ApparentAgeFullExternalError: list = kwargs.pop("ApparentAgeFullExternalError", [])
+        self.KCaRatios: list = kwargs.pop("KCaRatios", [])
+        self.KCaRatiosError: list = kwargs.pop("KCaRatiosError", [])
+        self.KClRatios: list = kwargs.pop("KClRatios", [])
+        self.KClRatiosError: list = kwargs.pop("KClRatiosError", [])
+        self.CaClRatios: list = kwargs.pop("CaClRatios", [])
+        self.CaClRatiosError: list = kwargs.pop("CaClRatiosError", [])
+
+        """isochron and spectra data"""
+        self.ClNormalIsochron: list = kwargs.pop("ClNormalIsochron", [])
+        self.ClInverseIsochron: list = kwargs.pop("ClInverseIsochron", [])
+        self.ClKIsochron: list = kwargs.pop("ClKIsochron", [])
+        self.AtmNormalIsochron: list = kwargs.pop("AtmNormalIsochron", [])
+        self.AtmInverseIsochron: list = kwargs.pop("AtmInverseIsochron", [])
+        self.ThreeDIsochron: list = kwargs.pop("ThreeDimIsochron", [])
+        self.IsochronSelectedPoints: list = kwargs.pop("IsochronSelectedPoints", [])
+        self.PlateauAges: list = kwargs.pop("PlateauAges", [])
+        self.TotalFusionAge: list = kwargs.pop("TotalFusionAge", [])
+        self.SpectraLines: list = kwargs.pop("SpectraLines", [])
+
+        """degas results data"""
+        self.Ar36DegasCaError: list = kwargs.pop("Ar36DegasCaError", [])
+        self.Ar36DegasKError: list = kwargs.pop("Ar36DegasKError", [])
+        self.Ar36DegasClError: list = kwargs.pop("Ar36DegasClError", [])
+        self.Ar36DegasAirError: list = kwargs.pop("Ar36DegasAirError", [])
+        self.Ar37DegasCaError: list = kwargs.pop("Ar37DegasCaError", [])
+        self.Ar37DegasKError: list = kwargs.pop("Ar37DegasKError", [])
+        self.Ar37DegasClError: list = kwargs.pop("Ar37DegasClError", [])
+        self.Ar37DegasAirError: list = kwargs.pop("Ar37DegasAirError", [])
+        self.Ar38DegasCaError: list = kwargs.pop("Ar38DegasCaError", [])
+        self.Ar38DegasKError: list = kwargs.pop("Ar38DegasKError", [])
+        self.Ar38DegasClError: list = kwargs.pop("Ar38DegasClError", [])
+        self.Ar38DegasAirError: list = kwargs.pop("Ar38DegasAirError", [])
+        self.Ar39DegasCaError: list = kwargs.pop("Ar39DegasCaError", [])
+        self.Ar39DegasKError: list = kwargs.pop("Ar39DegasKError", [])
+        self.Ar39DegasClError: list = kwargs.pop("Ar39DegasClError", [])
+        self.Ar39DegasAirError: list = kwargs.pop("Ar39DegasAirError", [])
+        self.Ar40DegasCaError: list = kwargs.pop("Ar40DegasCaError", [])
+        self.Ar40DegasKError: list = kwargs.pop("Ar40DegasKError", [])
+        self.Ar40DegasClError: list = kwargs.pop("Ar40DegasClError", [])
+        self.Ar40DegasAirError: list = kwargs.pop("Ar40DegasAirError", [])
+        self.Ar40DegasRError: list = kwargs.pop("Ar40DegasRError", [])
+
+        """isochron data"""
+        self.Ar40vsAr36Const: float = kwargs.pop("Ar40vsAr36Const", Ar40vsAr36Const)
+        self.Ar40vsAr36ConstError: float = kwargs.pop("Ar40vsAr36ConstError", Ar40vsAr36ConstError)
+        self.York2FitConvergence: float = kwargs.pop("York2FitConvergence", York2FitConvergence)
+        self.York2FitIteration: float = kwargs.pop("York2FitIteration", York2FitIteration)
+        self.Fitting: str = kwargs.pop("Fitting", Fitting)
+
+        """correct"""
+        self.Corr37ArDecay: bool = kwargs.pop("Corr37ArDecay", Corr37ArDecay)
+        self.Corr39ArDecay: bool = kwargs.pop("Corr39ArDecay", Corr39ArDecay)
+        self.Corr36ClDecay: bool = kwargs.pop("Corr36ClDecay", Corr36ClDecay)
+        self.CorrK: bool = kwargs.pop("CorrK", CorrK)
+        self.CorrCa: bool = kwargs.pop("CorrCa", CorrCa)
+        self.CorrCl: bool = kwargs.pop("CorrCl", CorrCl)
+        self.CorrAtm: bool = kwargs.pop("CorrAtm", CorrAtm)
+        self.UseDecayConst: bool = kwargs.pop("UseDecayConst", UseDecayConst)
+        self.UseInterceptCorrAtm: bool = kwargs.pop("UseInterceptCorrAtm", UseInterceptCorrAtm)
+        self.UseMinCalculation: bool = kwargs.pop("UseMinCalculation", UseMinCalculation)
+
+class MonitorSample(Sample):
+    def __init__(self, **kwargs):
+        """
+        Create a sample instance.
 
         parameters
         ----------
-        path: str
-            filtered file path.
+        Sample Type: Monitor Sample
         """
-        self.initializeData()
-        if path:
-            self.FilteredFilePath = path
-        res = open_filtered_xls(self.FilteredFilePath)
-        if res:
-            self._readFilteredFile(res)
+        super().__init__(SampleType=kwargs.pop("SampleType", "MonitorSample"),
+                         **kwargs)
+        self.MonitorName: str = kwargs.pop("MonitorName", "")
+        self.MonitorAge: float = kwargs.pop("MonitorAge", "")
+        self.MonitorAgeError: float = kwargs.pop("MonitorAgeError", "")
+        self.TotalF: float = kwargs.pop("TotalF", "")
+        self.TotalFError: float = kwargs.pop("TotalFError", "")
+        self.MonitorJValue: float = kwargs.pop("MonitorJValue", "")
+        self.MonitorJValueError: float = kwargs.pop("MonitorJValueError", "")
 
-    def _readFilteredFile(self, res):
-        for key, value in res[0].items():
-            self.MSequenceList.append(value[0])
-            self.MStepsList.append(value[1])
-            self.Ar36MList.append(value[2])
-            self.Ar37MList.append(value[5])
-            self.Ar38MList.append(value[8])
-            self.Ar39MList.append(value[11])
-            self.Ar40MList.append(value[14])
-            self.Ar36MErrorList.append(value[3])
-            self.Ar37MErrorList.append(value[6])
-            self.Ar38MErrorList.append(value[9])
-            self.Ar39MErrorList.append(value[12])
-            self.Ar40MErrorList.append(value[15])
-            self.MDateTimeList.append([int(_i) for _i in value[17:22]])
-        for key, value in res[1].items():
-            self.BStepsList.append(value[1])
-            self.BSequenceList.append(value[2])
-            self.Ar36BList.append(value[3])
-            self.Ar37BList.append(value[5])
-            self.Ar38BList.append(value[7])
-            self.Ar39BList.append(value[9])
-            self.Ar40BList.append(value[11])
-            self.Ar36BErrorList.append(value[4])
-            self.Ar37BErrorList.append(value[6])
-            self.Ar38BErrorList.append(value[8])
-            self.Ar39BErrorList.append(value[10])
-            self.Ar40BErrorList.append(value[12])
-
-    def readDataFromAgeFile(self, path=None):
+class AirSample(Sample):
+    def __init__(self, **kwargs):
         """
-        Read data from filtered file.
+        Create a sample instance.
 
         parameters
         ----------
-        path: str
-            age file path.
+        Sample Type: AirSample
         """
-        self.initializeData()
-        if path:
-            self.AgeFilePath = path
-        res = open_age_xls(self.AgeFilePath)
-        if res:
-            self._readFilteredFile(res)
-            self.IrradiationDurationList = res[3]
-            self.IrradiationEndTimeList = res[4]
-            book_contents = res[2]
-            # read data
-            data_tables_value = book_contents['Data Tables']
-            # read and rewrite calculation params
-            logs01_params = book_contents['Logs01']
-            # read and rewrite irradiation params
-            self.SampleName = str(data_tables_value[44][5])
-            self.SampleMineral = str(data_tables_value[45][5])
-            self.ExperimentAnalyst = str(data_tables_value[47][5])
-            self.StandardAge = float(data_tables_value[49][5])
-            self.StandardAgeError = float(data_tables_value[50][5]) / 100 * float(data_tables_value[49][5])
-            self.JValue = float(data_tables_value[51][5])
-            self.JValueError = float(data_tables_value[52][5]) / 100 * float(data_tables_value[51][5])
-            self.MDF = float(data_tables_value[53][5])
-            self.MDFError = float(data_tables_value[54][5]) / 100 * float(data_tables_value[53][5])
-            self.ExperimentName = str(data_tables_value[65][5])
-            self.StandardName = str(data_tables_value[67][5])
-            self.Ar40vsAr36Trapped = float(data_tables_value[71][5])
-            self.Ar40vsAr36TrappedError = float(data_tables_value[72][5]) / 100 * float(data_tables_value[71][5])
-            self.Ar40vsAr36Cosmo = float(data_tables_value[73][5])
-            self.Ar40vsAr36CosmoError = float(data_tables_value[74][5]) / 100 * float(data_tables_value[73][5])
-            self.Ar38vsAr36Trapped = float(data_tables_value[75][5])
-            self.Ar38vsAr36TrappedError = float(data_tables_value[76][5]) / 100 * float(data_tables_value[75][5])
-            self.Ar38vsAr36Cosmo = float(data_tables_value[77][5])
-            self.Ar38vsAr36CosmoError = float(data_tables_value[78][5]) / 100 * float(data_tables_value[77][5])
-            self.Ar39vsAr37Ca = float(data_tables_value[79][5])
-            self.Ar39vsAr37CaError = float(data_tables_value[80][5]) / 100 * float(data_tables_value[79][5])
-            self.Ar38vsAr37Ca = float(data_tables_value[81][5])
-            self.Ar38vsAr37CaError = float(data_tables_value[82][5]) / 100 * float(data_tables_value[81][5])
-            self.Ar36vsAr37Ca = float(data_tables_value[83][5])
-            self.Ar36vsAr37CaError = float(data_tables_value[84][5]) / 100 * float(data_tables_value[83][5])
-            self.Ar40vsAr39K = float(data_tables_value[85][5])
-            self.Ar40vsAr39KError = float(data_tables_value[86][5]) / 100 * float(data_tables_value[85][5])
-            self.Ar38vsAr39K = float(data_tables_value[87][5])
-            self.Ar38vsAr39KError = float(data_tables_value[88][5]) / 100 * float(data_tables_value[87][5])
-            self.Ar36vsAr38Cl = float(data_tables_value[89][5])
-            self.Ar36vsAr38ClError = float(data_tables_value[90][5]) / 100 * float(data_tables_value[89][5])
-            self.KvsCaFactor = float(data_tables_value[91][5])
-            self.KvsCaFactorError = float(data_tables_value[92][5]) / 100 * float(data_tables_value[91][5])
-            self.KvsClFactor = float(data_tables_value[93][5])
-            self.KvsClFactorError = float(data_tables_value[94][5]) / 100 * float(data_tables_value[93][5])
-            self.CavsClFactor = float(data_tables_value[95][5])
-            self.CavsClFactorError = float(data_tables_value[96][5]) / 100 * float(data_tables_value[95][5])
-
-            # read and rewrite calculation params
-            self.York2FitConvergence = float(logs01_params[1][0]) / 100
-            self.York2FitIteration = int(logs01_params[1][1])
-            self.Corr37ArDecay = int(logs01_params[1][6])
-            self.Corr39ArDecay = int(logs01_params[1][7])
-            self.Corr36ClDecay = int(logs01_params[1][8])
-            self.Fitting = 'York-2'
-            self.K40Mass = float(logs01_params[1][11])
-            self.Ar40MassError = float(logs01_params[1][12]) / 100 * float(logs01_params[1][11])
-            self.K40vsKFractions = float(logs01_params[1][14])
-            self.K40vsKFractionsError = float(logs01_params[1][15]) / 100 * float(logs01_params[1][14])
-            self.Cl35vsCl37Fractions = float(logs01_params[1][16])
-            self.Cl35vsCl37FractionsError = float(logs01_params[1][17]) / 100 * float(logs01_params[1][16])
-            self.Cl36vs38Productivity = float(logs01_params[1][18])
-            self.Cl36vs38ProductivityError = float(logs01_params[1][19]) / 100 * float(logs01_params[1][18])
-            self.HClvsClFractions = float(logs01_params[1][24])
-            self.HClvsClFractionsError = float(logs01_params[1][25]) / 100 * float(logs01_params[1][24])
-            self.K40ECActivity = float(logs01_params[1][26])
-            self.K40ECActivityError = float(logs01_params[1][27]) / 100 * float(logs01_params[1][26])
-            self.K40BetaNActivity = float(logs01_params[1][28])
-            self.K40BetaNActivityError = float(logs01_params[1][29]) / 100 * float(logs01_params[1][28])
-            self.K40ECConst = float(logs01_params[1][30])
-            self.K40ECConstError = float(logs01_params[1][31]) / 100 * float(logs01_params[1][30])
-            self.K40BetaNConst = float(logs01_params[1][32])
-            self.K40BetaNConstError = float(logs01_params[1][33]) / 100 * float(logs01_params[1][32])
-            self.Cl36Const = float(logs01_params[1][34])
-            self.Cl36ConstError = float(logs01_params[1][35]) / 100 * float(logs01_params[1][34])
-            self.K40Const = float(logs01_params[1][36])
-            self.K40ConstError = float(logs01_params[1][37]) / 100 * float(logs01_params[1][36])
-            self.Ar39Const = float(logs01_params[1][38])
-            self.Ar39ConstError = float(logs01_params[1][39]) / 100 * float(logs01_params[1][38])
-            self.Ar37Const = float(logs01_params[1][40])
-            self.Ar37ConstError = float(logs01_params[1][41]) / 100 * float(logs01_params[1][40])
-            self.Ar40vsAr36AirConst = float(logs01_params[1][70])
-            self.Ar40vsAr36AirConstError = float(logs01_params[1][71]) / 100 * float(logs01_params[1][70])
-
-            self.LinMassDiscrLaw = 1 if logs01_params[1][67] == 'LIN' else 0
-            self.ExpMassDiscrLaw = 1 if logs01_params[1][67] == 'EXP' else 0
-            self.PowMassDiscrLaw = 1 if logs01_params[1][67] == 'POW' else 0
-            self.UseMinCalculation = 1 if logs01_params[1][5] == 'MIN' else 0
-            self.CorrBlank = 1
-
-    def initializeData(self):
-        """
-        Initialize the data list
-        """
-        _dataList = [self.MSequenceList, self.BSequenceList, self.MStepsList, self.BStepsList,
-                     self.Ar36MList, self.Ar37MList, self.Ar38MList, self.Ar39MList, self.Ar40MList,
-                     self.Ar36MErrorList, self.Ar37MErrorList, self.Ar38MErrorList, self.Ar39MErrorList,
-                     self.Ar40MErrorList,
-                     self.Ar36BList, self.Ar37BList, self.Ar38BList, self.Ar39BList, self.Ar40BList,
-                     self.Ar36BErrorList, self.Ar37BErrorList, self.Ar38BErrorList, self.Ar39BErrorList,
-                     self.Ar40BErrorList,
-                     self.Ar36DegasCa, self.Ar36DegasK, self.Ar36DegasCl, self.Ar36DegasAir,
-                     self.Ar37DegasCa, self.Ar37DegasK, self.Ar37DegasCl, self.Ar37DegasAir,
-                     self.Ar38DegasCa, self.Ar38DegasK, self.Ar38DegasCl, self.Ar38DegasAir,
-                     self.Ar39DegasCa, self.Ar39DegasK, self.Ar39DegasCl, self.Ar39DegasAir,
-                     self.Ar40DegasCa, self.Ar40DegasK, self.Ar40DegasCl, self.Ar40DegasAir,
-                     self.Ar40DegasR,
-                     self.Ar36DegasCaError, self.Ar36DegasKError, self.Ar36DegasClError, self.Ar36DegasAirError,
-                     self.Ar37DegasCaError, self.Ar37DegasKError, self.Ar37DegasClError, self.Ar37DegasAirError,
-                     self.Ar38DegasCaError, self.Ar38DegasKError, self.Ar38DegasClError, self.Ar38DegasAirError,
-                     self.Ar39DegasCaError, self.Ar39DegasKError, self.Ar39DegasClError, self.Ar39DegasAirError,
-                     self.Ar40DegasCaError, self.Ar40DegasKError, self.Ar40DegasClError, self.Ar40DegasAirError,
-                     self.Ar40DegasRError]
-        for each_list in _dataList:
-            each_list.clear()
+        super().__init__(SampleType=kwargs.pop("SampleType", "AirSample"),
+                         **kwargs)
+        self.AirMDF: float = kwargs.pop("AirMDF", "")  # 40Ara / 36Ara
+        self.AirMDFError: float = kwargs.pop("AirMDFError", "")
+        self.AirRatio: float = kwargs.pop("AirRatio", "")  # 40Ara / 36Ara
+        self.AirRatioError: float = kwargs.pop("AirRatioError", "")

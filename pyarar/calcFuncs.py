@@ -75,10 +75,6 @@ def j_value(age: float, sage: float, r: float, sr: float, f: float, rsf: float):
     f = f * 1000000  # exchange to unit of Ma
     rsf = f * rsf / 100  # exchange to absolute error
     k0 = (exp(f * age) - 1) / r
-    """
-    k2 = error_divide(((exp(f * a0) - 1), exp(f * a0) * error_multiply((f, sf), (a0, a1))), (a2, a3))
-    # result might be a little different with k1 below
-    """
     v1 = rsf ** 2 * (age * exp(f * age) / r) ** 2
     v2 = sage ** 2 * (f * exp(f * age) / r) ** 2
     v3 = sr ** 2 * ((1 - exp(f * age)) / r ** 2) ** 2
@@ -98,9 +94,9 @@ def get_mdf(rm: float, srm: float, m1: float, m2: float, isAapkop: bool = True):
     :param m2: Ar40 isotopic mass
     :return:
     """
-    sm1 = 0;
+    sm1 = 0
     sm2 = 0
-    ra = 298.35;
+    ra = 298.35
     sra = 0
     delta_m = m2 - m1
     sdelta_m = error_add(sm2, sm1)
@@ -123,6 +119,7 @@ def get_mdf(rm: float, srm: float, m1: float, m2: float, isAapkop: bool = True):
         return k1, k2, k3, k4, k5, k6
     else:
         mdf_line_2 = (rm / ra - 1) / delta_m  # Ryu et al., 2013
+        return mdf_line_2, 0, 0, 0, 0, 0
 
 
 def corr_blank(a0: list, e0: list, a1: list, e1: list):
@@ -405,7 +402,7 @@ def wtd_york2_regression(x: list, sx: list, y: list, sy: list, ri: list, sf: int
     n = len(x)
     sx = [i / sf for i in sx]  # change to 1 sigma
     sy = [i / sf for i in sy]  # change to 1 sigma
-    temp_lst = intercept_linest(y, x, external=True)
+    temp_lst = intercept_linest(y, x)
     if not temp_lst:
         return False
     b, seb, m, sem = temp_lst[0], temp_lst[1], temp_lst[5][0], temp_lst[6][0]
@@ -527,7 +524,7 @@ def isochron_age_ols(x: list, y: list, j: float, rsj: float, f: float, rsf: floa
     if not (isNormal or isInverse) or (isNormal and isInverse):
         print('isochron type was not assigned')
         return None
-    b, seb, rseb, r2, mswd, [m], [sem] = intercept_linest(y, x, external=False)
+    b, seb, rseb, r2, mswd, [m], [sem] = intercept_linest(y, x)
     if isNormal:
         k0 = m
         k1 = sem
@@ -537,7 +534,7 @@ def isochron_age_ols(x: list, y: list, j: float, rsj: float, f: float, rsf: floa
     else:
         k0 = 1 / b
         k1 = error_div((1, 0), (b, seb))
-        new_b, new_seb, new_rseb, new_r2, mswd, [new_m], [new_sem] = intercept_linest(x, y, external=False)
+        new_b, new_seb, new_rseb, new_r2, mswd, [new_m], [new_sem] = intercept_linest(x, y)
         k2 = 1 / new_b
         k3 = error_div((1, 0), (new_b, new_seb))
         k4, k5, k6, k7 = calc_age(k2, k3, j, rsj, f, rsf)
@@ -624,7 +621,7 @@ def intercept_weighted_least_squares(a0: list, a1: list):
     """
     y = m * x + b, 
     """
-    b0, seb0, rseb0, r2, mswd, [m0], [rem0] = intercept_linest(a0, a1, external=True)
+    b0, seb0, rseb0, r2, mswd, [m0], [rem0] = intercept_linest(a0, a1)
     y0 = list(map(lambda i: m0 * i + b0, a1))
     resid = list(map(lambda i, j: i - j, y0, a0))
     weight = list(map(lambda i: 1 / i ** 2, resid))  # Use weighting by inverse of the squares of residual
@@ -639,16 +636,15 @@ def intercept_weighted_least_squares(a0: list, a1: list):
     b = (sum_wiyi - m * sum_wixi) / sum_wi
     a0 = list(map(lambda i, j: i * j, weight, a0))
     a1 = list(map(lambda i, j: i * j, weight, a1))
-    b, seb, rseb, r2, mswd, [m], [rem] = intercept_linest(a0, a1, external=True, weight=weight)
+    b, seb, rseb, r2, mswd, [m], [rem] = intercept_linest(a0, a1, weight=weight)
     return b, seb, rseb, r2, [m], [rem]
 
 
-def intercept_linest(a0: list, a1: list, *args, external=False, weight: list = None):
+def intercept_linest(a0: list, a1: list, *args, weight: list = None):
     """
     :param a0: known_y's, y = b + m * x
     :param a1: known_x's
     :param args: more known_x's
-    :param external: external = True when is called by other fitting functions, default = False
     :param weight: necessary when weighted least squares fitting
     :return: intercept | standard error | relative error | R2 | MSWD | other params: list | error of other params: list
     """
@@ -767,16 +763,11 @@ def intercept_linest(a0: list, a1: list, *args, external=False, weight: list = N
     m_ssresid = ssresid / df
     se_beta = [pow(m_ssresid * inv_xtx[i][i], 0.5) for i in range(n)]
     rseb = (se_beta[0] / beta[0]) * 100 if beta[0] != 0 else se_beta[0]  # relative error of intercept
-    try:
-        r2 = ssreg / sstotal  # r2 = ssreg / sstotal
-    except ZeroDivisionError:
-        r2 = 1
+    r2 = ssreg / sstotal if sstotal != 0 else 1 # r2 = ssreg / sstotal
     try:
         mswd = sum(list(map(lambda resid_i, reg_i: (resid_i ** 2) / (reg_i ** 2), resid, reg))) / (m - 1)
     except ZeroDivisionError:
         mswd = 9999
-    if not external:
-        pass
     return beta[0], se_beta[0], rseb, r2, mswd, beta[1:], se_beta[1:]
 
 
@@ -789,7 +780,7 @@ def intercept_parabolic(a0: list, a1: list):
     """
     y = b + m1 * x + m2 * x ^ 2
     """
-    b, seb, rseb, r2, mswd, [m1, m2], [sem1, sem2] = intercept_linest(a0, a1, [i ** 2 for i in a1], external=True)
+    b, seb, rseb, r2, mswd, [m1, m2], [sem1, sem2] = intercept_linest(a0, a1, [i ** 2 for i in a1])
     return b, seb, rseb, r2, mswd, [m1, m2], [sem1, sem2]
 
 
@@ -803,7 +794,7 @@ def intercept_logest(a0: list, a1: list):
     y = b * m ^ x, Microsoft Excel LOGEST function, ln(y) = ln(b) + ln(m) * x
     """
     a0 = [log(i) for i in a0]  # ln(y)
-    b, seb, rseb, r2, mswd, [lnm], [selnm] = intercept_linest(a0, a1, external=True)
+    b, seb, rseb, r2, mswd, [lnm], [selnm] = intercept_linest(a0, a1)
     b = exp(b)
     m = exp(lnm)
     sem = exp(lnm) * selnm
@@ -847,7 +838,7 @@ def intercept_exponential(a0: list, a1: list, slope: float, curvature: float):
         c = c * (1 - stp)
         '''y = m * z + b while z = exp(c * x)'''
         z = [exp(c * i) for i in a1]
-        b, seb, rseb, r2, mswd, [m], [sem] = intercept_linest(a0, z, external=True)
+        b, seb, rseb, r2, mswd, [m], [sem] = intercept_linest(a0, z)
         intercept = b + m
         '''calculate error of intercept'''
         errfz = pow(sum([i ** 2 for i in z]) / (n * sum([i ** 2 for i in z]) - sum(z) ** 2), 0.5)
@@ -1526,9 +1517,9 @@ if __name__ == '__main__':
           24.05106119, 24.01051296]
     _b = [12.231848, 24.586848, 36.911848, 49.220848, 61.532848, 73.840848, 86.154848, 98.454848, 110.790848,
           123.128848]
-    _k = intercept_linest(_a, _b, external=True)
+    _k = intercept_linest(_a, _b)
     print(_k)
     _a2 = list(map(lambda i: i / (1 - 0.16), _a))
-    _k2 = intercept_linest(_a2, _b, external=True)
+    _k2 = intercept_linest(_a2, _b)
     print(_k2)
     '''这说明在外推零时刻值时，虽然有等比例缩放，但是截距值的相对误差是不变的'''
